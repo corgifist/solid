@@ -24,7 +24,7 @@ string token_vector_to_string(vector<Token> toks) {
 ///////////////////////////////
 
 int main() {
-    Lexer lexer = Lexer("+-*/");
+    Lexer lexer = Lexer("2 + 25.21 * 3.14 + 3.1");
     vector<Token> result = lexer.lex();
     token_vector_to_string(result);
     return 0;

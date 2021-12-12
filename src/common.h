@@ -8,7 +8,6 @@
 #include<cstdio>
 #include<vector>
 #include<cstring>
-#include<stdarg.h>
 #include<sstream>
 
 using namespace std;
@@ -17,4 +16,5 @@ using namespace std;
 
 static void barley_exception(string type, string msg, int line) {
 	print("** (" << type << ") " << msg << " at line " << line);
+    exit(1);
 }

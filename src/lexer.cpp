@@ -42,7 +42,7 @@ public:
 
 class Lexer {
 private:
-    const char* input;
+    string input;
     unsigned int length, pos, line;
     vector<Token> result;
 
@@ -51,11 +51,9 @@ private:
     }
 
     char peek(int relativePos) {
-        string str = input;
         int finalPos = pos + relativePos;
-        char at = str.at(finalPos);
-        if (at == '\0') return '\0';
-        return at;
+        if (finalPos >= length) return '\0';
+        return input.at(finalPos);
     }
 
     char advance() {
@@ -78,6 +76,21 @@ private:
         acc = acc + current;
         acc = acc + "'";
         lex_error(acc, line);
+    }
+
+    void number() {
+        char current = peek(0);
+        string acc = "";
+        while (IS_DIGIT(peek(0)) || peek(0) == '.') {
+            if (peek(0) == '.') {
+                if (acc.find(".") != string::npos) {
+                    lex_error("invalid float number", line);
+                }
+            }
+            acc += peek(0);
+            advance();
+        }
+        addToken("NUMBER", acc);
     }
 
 public:
@@ -104,9 +117,11 @@ public:
                 case '/':
                     addToken("SLASH", "/");
                     break;
-                case ' ':
-                    break;
-                default: illegal_character(current);
+                SKIP_WHITESPACES();
+                default: // checks
+                    if (IS_DIGIT(current)) {
+                        number();
+                    } else illegal_character(current);
             }
             advance();
         }
@@ -117,7 +132,7 @@ public:
         input = msg;
     }
 
-    const char* getInput() const {
+    string getInput() const {
         return input;
     }
 
