@@ -7,7 +7,7 @@ private:
     unsigned int length, pos, line;
     vector<Token> result;
 
-    Token token(TokenType type, const char* msg) {
+    Token token(TokenType type, string msg) {
         Token tok;
         tok.type = type;
         tok.text = msg;
@@ -34,6 +34,10 @@ private:
         return pos >= length;
     }
 
+    void addToken(TokenType type, string msg) {
+        result.push_back(token(type, msg));
+    }
+
 public:
     Lexer(const char* source) {
         input = source;
@@ -43,7 +47,13 @@ public:
     }
 
     vector<Token> lex() {
-        return result;
+        while (!end()) {
+            char current = peek(0);
+            switch (current) {
+                case '+':
+
+            }
+        }
     }
 
     void setInput(const char* msg) {

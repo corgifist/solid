@@ -13,7 +13,7 @@ enum TokenType {
 typedef struct Token {
 	TokenType type;
 	int line;
-	const char* text;
+	string text;
 } Token;
 
 
