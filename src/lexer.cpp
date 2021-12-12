@@ -1,5 +1,43 @@
+// This script is part of SOLID language.
+// Copyright 2021.
+
 #include "lexer.h"
 #include "common.h"
+
+class Token {
+    TokenType type;
+    int line;
+    string text;
+
+public:
+    Token(TokenType type, unsigned int line, string text) {
+        this->type = type;
+        this->line = line;
+        this->text = text;
+    }
+
+    TokenType getType() const {
+        return type;
+    }
+
+    int getLine() const {
+        return line;
+    }
+
+    string getText() const {
+        return text;
+    }
+
+    string asString() {
+        string acc = "";
+        acc += type;
+        acc += " ";
+        acc += line;
+        acc += " ";
+        acc += text;
+        return acc;
+    }
+};
 
 class Lexer {
 private:
@@ -8,11 +46,7 @@ private:
     vector<Token> result;
 
     Token token(TokenType type, string msg) {
-        Token tok;
-        tok.type = type;
-        tok.text = msg;
-        tok.line = line;
-        return tok;
+        return Token(type, line, msg);
     }
 
     char peek(int relativePos) {
@@ -38,6 +72,13 @@ private:
         result.push_back(token(type, msg));
     }
 
+    void illegal_character(char current) {
+        string acc = "illegal character '";
+        acc = acc + current;
+        acc = acc + "'";
+        lex_error(acc, line);
+    }
+
 public:
     Lexer(const char* source) {
         input = source;
@@ -51,9 +92,24 @@ public:
             char current = peek(0);
             switch (current) {
                 case '+':
-
+                    addToken("PLUS", "+");
+                    break;
+                case '-':
+                    addToken("MINUS", "-");
+                    break;
+                case '*':
+                    addToken("STAR", "*");
+                    break;
+                case '/':
+                    addToken("SLASH", "/");
+                    break;
+                case ' ':
+                    break;
+                default: illegal_character(current);
             }
+            advance();
         }
+        return result;
     }
 
     void setInput(const char* msg) {

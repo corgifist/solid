@@ -1,14 +1,21 @@
+// This script is part of SOLID language.
+// Copyright 2021.
+
 #pragma once
 
 #include<iostream>
 #include<cstdlib>
+#include<cstdio>
 #include<vector>
 #include<cstring>
+#include<stdarg.h>
+#include<termios.h>
+
 
 using namespace std;
 
 #define print(S) cout << S << endl
 
-static void barley_exception(const char* type, const char* msg, int line) {
+static void barley_exception(string type, string msg, int line) {
 	print("** (" << type << ") " << msg << " at line " << line);
 }
