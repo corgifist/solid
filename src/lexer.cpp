@@ -3,6 +3,7 @@
 
 #include "lexer.h"
 #include "common.h"
+#include "utils.cpp"
 
 class Token {
     TokenType type;
@@ -32,7 +33,7 @@ public:
         string acc = "";
         acc += type;
         acc += " ";
-        acc += line;
+        acc += SSTR(line);
         acc += " ";
         acc += text;
         return acc;
