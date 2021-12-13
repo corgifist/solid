@@ -8,7 +8,7 @@ void initChunk(Chunk* chunk) {
     chunk->count = 0;
     chunk->capacity = 0;
     chunk->code = NULL;
-    initConstants(chunk->constants);
+    initConstants(&chunk->constants);
 }
 
 void writeChunk(Chunk* chunk, uint8_t code) {
@@ -28,8 +28,8 @@ void freeChunk(Chunk* chunk) {
 }
 
 int writeConstant(Chunk* chunk, Value value) {
-    writeConstants(chunk->constants, value);
-    return chunk->constants->count - 1;
+    writeConstants(&chunk->constants, value);
+    return chunk->constants.count - 1;
 }
 
 

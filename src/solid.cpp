@@ -30,8 +30,11 @@ int main() {
     Chunk chunk;
     initChunk(&chunk);
     int position = writeConstant(&chunk, INT_VALUE(1));
+    int position2 = writeConstant(&chunk, INT_VALUE(2));
     writeChunk(&chunk, CONST);
     writeChunk(&chunk, position);
+    writeChunk(&chunk, CONST);
+    writeChunk(&chunk, position2);
     disassemble(&chunk, "test chunk");
     return 0;
 }

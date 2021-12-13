@@ -7,6 +7,7 @@
 void initConstants(Constants* consts) {
     consts->count = 0;
     consts->capacity = 0;
+    consts->values = NULL;
 }
 
 void writeConstants(Constants* consts, Value value) {

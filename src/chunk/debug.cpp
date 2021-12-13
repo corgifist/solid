@@ -16,8 +16,8 @@ int unknownOffset(int offset) {
 }
 
 int constOffset(int offset, const char* name, Chunk* chunk) {
-    Value constant = chunk->constants->values[chunk->code[offset + 1]];
-    print(name << " " << size(constant) << " '" << object_to_string(constant) << "'");
+    Value constant = chunk->constants.values[chunk->code[offset + 1]];
+    print(name << " " << size(constant) << " *" << &constant << " '" << object_to_string(constant) << "'");
     return offset + 2;
 }
 
