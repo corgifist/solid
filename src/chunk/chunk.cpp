@@ -24,6 +24,7 @@ void writeChunk(Chunk* chunk, uint8_t code) {
 
 void freeChunk(Chunk* chunk) {
     FREE_ARRAY(uint8_t, chunk->code, chunk->capacity);
+    freeConstants(&chunk->constants);
     initChunk(chunk);
 }
 

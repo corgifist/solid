@@ -26,7 +26,7 @@ typedef enum {
 
 #define CHAR_PTR(ch) (reinterpret_cast<uint8_t *>(ch))
 
-static string object_to_string(Value value) {
+static std::string object_to_string(Value value) {
     switch (value.type) {
         case INT:
             return SSTR(value.as.int_number);

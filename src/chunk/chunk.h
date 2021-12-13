@@ -5,7 +5,6 @@
 
 #include "../utils.h"
 #include "constnants.h"
-#include <stdint-gcc.h>
 #include <cstdlib>
 
 typedef struct {

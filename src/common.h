@@ -9,17 +9,20 @@
 #include<vector>
 #include<cstring>
 #include<sstream>
+#include <stdint-gcc.h>
+
+#include "runtime.h"
 
 using namespace std;
 
 #define print(S) cout << S << endl
 
 static void barley_exception(string type, string msg, int line) {
+    runtime_result = RUNTIME_ERROR;
 	print("** (" << type << ") " << msg << " at line " << line);
-    exit(1);
 }
 
 static void system_exception(string type, string msg) {
+    runtime_result = RUNTIME_ERROR;
     print("** (" << type << ") " << msg);
-    exit(2);
 }

@@ -9,5 +9,6 @@ typedef string TokenType;
 
 static void lex_error(string msg, int line) {
 	barley_exception("LexError", msg, line);
+    runtime_result = COMPILE_ERROR;
 }
 

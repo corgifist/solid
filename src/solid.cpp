@@ -5,13 +5,11 @@
 #include "chunk/chunk.h"
 #include "chunk/debug.h"
 #include "values/type.h"
-
-Lexer lexer(const char* msg) {
-    Lexer lex = Lexer(msg);
-    return lex;
-}
+#include "runtime/vm.h"
+#include "utils.h"
 
 ////////////////////////////////
+
 
 void dump_lexer(Lexer lex) {
     print("input: " << lex.getInput());
@@ -35,6 +33,10 @@ int main() {
     writeChunk(&chunk, position);
     writeChunk(&chunk, CONST);
     writeChunk(&chunk, position2);
+    writeChunk(&chunk, RETURN);
+    VM vm;
     disassemble(&chunk, "test chunk");
+    initVM(&chunk);
+    interpret();
     return 0;
 }
