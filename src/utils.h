@@ -7,7 +7,7 @@
 #include "common.h"
 
 typedef enum {
-    RETURN, CONSTANT, UNARY
+    RETURN, CONSTANT, UNARY, EXTRACT_BIND
 } OpCode;
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
@@ -33,6 +33,8 @@ static std::string object_to_string(Value value) {
             if (remainder(value.as.number, 2.0) == 0.0) {
                 return SSTR((int) value.as.number);
             } else return SSTR(value.as.number);
+        case STRING:
+            return value.as.string;
         default: return "NULL";
     }
 }
@@ -41,6 +43,8 @@ static size_t size(Value value) {
     switch (value.type) {
         case NUMBER:
             return sizeof(value.as.number);
-        default: return 24;
+        case STRING:
+            return sizeof(value.as.string);
+        default: return 8;
     }
 }

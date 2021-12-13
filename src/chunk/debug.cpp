@@ -30,6 +30,8 @@ int offsetize(Chunk* chunk, int offset) {
             return simpleOffset(offset, "RETURN");
         case CONSTANT:
             return constOffset(offset, "CONSTANT", chunk);
+        case EXTRACT_BIND:
+            return constOffset(offset, "EXTRACT_BIND", chunk);
         case UNARY:
             return unaryOffset(offset, "UNARY", chunk);
         default:
