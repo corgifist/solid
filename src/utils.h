@@ -3,8 +3,10 @@
 
 #pragma once
 
+#include "values/type.h"
+
 typedef enum {
-    RETURN
+    RETURN, CONST
 } OpCode;
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
@@ -22,4 +24,20 @@ typedef enum {
     case '\n': \
         break
 
-#define CHAR_PTR(ch) reinterpret_cast<uint8_t *>(ch)
+#define CHAR_PTR(ch) (reinterpret_cast<uint8_t *>(ch))
+
+static string object_to_string(Value value) {
+    switch (value.type) {
+        case INT:
+            return SSTR(value.as.int_number);
+        default: return "NULL";
+    }
+}
+
+static size_t size(Value value) {
+    switch (value.type) {
+        case INT:
+            return sizeof(value.as.int_number);
+        default: return 24;
+    }
+}

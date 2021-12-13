@@ -2,6 +2,9 @@
 // Copyright 2021.
 
 #include "lexer.cpp"
+#include "chunk/chunk.h"
+#include "chunk/debug.h"
+#include "values/type.h"
 
 Lexer lexer(const char* msg) {
     Lexer lex = Lexer(msg);
@@ -24,8 +27,11 @@ string token_vector_to_string(vector<Token> toks) {
 ///////////////////////////////
 
 int main() {
-    Lexer lexer = Lexer("2 + 25.21 * 3.14 + 3.1");
-    vector<Token> result = lexer.lex();
-    token_vector_to_string(result);
+    Chunk chunk;
+    initChunk(&chunk);
+    int position = writeConstant(&chunk, INT_VALUE(1));
+    writeChunk(&chunk, CONST);
+    writeChunk(&chunk, position);
+    disassemble(&chunk, "test chunk");
     return 0;
 }
