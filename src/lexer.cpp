@@ -3,7 +3,7 @@
 
 #include "lexer.h"
 #include "common.h"
-#include "utils.cpp"
+#include "utils.h"
 
 class Token {
     TokenType type;

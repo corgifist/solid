@@ -18,3 +18,8 @@ static void barley_exception(string type, string msg, int line) {
 	print("** (" << type << ") " << msg << " at line " << line);
     exit(1);
 }
+
+static void system_exception(string type, string msg) {
+    print("** (" << type << ") " << msg);
+    exit(2);
+}
