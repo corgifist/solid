@@ -4,9 +4,10 @@
 #pragma once
 
 #include "values/type.h"
+#include "common.h"
 
 typedef enum {
-    RETURN, CONST
+    RETURN, CONSTANT, UNARY
 } OpCode;
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
@@ -28,16 +29,18 @@ typedef enum {
 
 static std::string object_to_string(Value value) {
     switch (value.type) {
-        case INT:
-            return SSTR(value.as.int_number);
+        case NUMBER:
+            if (remainder(value.as.number, 2.0) == 0.0) {
+                return SSTR((int) value.as.number);
+            } else return SSTR(value.as.number);
         default: return "NULL";
     }
 }
 
 static size_t size(Value value) {
     switch (value.type) {
-        case INT:
-            return sizeof(value.as.int_number);
+        case NUMBER:
+            return sizeof(value.as.number);
         default: return 24;
     }
 }

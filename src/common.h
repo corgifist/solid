@@ -9,7 +9,8 @@
 #include<vector>
 #include<cstring>
 #include<sstream>
-#include <stdint-gcc.h>
+#include<stdint-gcc.h>
+#include "math.h"
 
 #include "runtime.h"
 

@@ -6,16 +6,21 @@
 #include "../common.h"
 
 typedef enum {
-    INT
+    NUMBER
 } ValueType;
 
 typedef struct {
     ValueType type;
     union {
-        long int_number;
-        double float_number;
+        double number;
     } as;
 } Value;
 
-#define INT_VALUE(value) ((Value){INT, {.int_number = value}})
+#define NUMBER(value) ((Value){ NUMBER, {.number = value}})
+
+#define IS_NUMBER(value) (value.type == NUMBER)
+
+#define AS_NUMBER(value) (value.as.number)
+
+#define IS_NUMBER_SUBSET(value) (value.type == NUMBER)
 

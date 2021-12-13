@@ -7,3 +7,13 @@
 #include "../common.h"
 
 void disassemble(Chunk* chunk, const char* name);
+
+int offsetize(Chunk* chunk, int offset);
+
+int simpleOffset(int offset, const char* name);
+
+int unknownOffset(int offset);
+
+int constOffset(int offset, const char* name, Chunk* chunk);
+
+int unaryOffset(int offset, const char* name, Chunk* chunk);

@@ -2,9 +2,12 @@
 // Copyright 2021.
 
 #include "vm.h"
+#include<strings.h>
 
 #define READ_BYTE() (*vm.stage++)
 #define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE()])
+#define READ_LINE() (vm.chunk->lines[*vm.stage])
+#define RUNTIME_ERROR() runtime_result = RUNTIME_ERROR
 
 VM vm;
 
@@ -20,21 +23,35 @@ void freeVM() {
 }
 
 InterpretResult interpret() {
-    runtime_result = RUNTIME_ERROR;
     for (;;) {
         uint8_t instruction;
         runtime_check();
-        if (runtime_result == RUNTIME_ERROR) break;
         switch (instruction = READ_BYTE()) {
+            case UNARY: {
+                char op = READ_BYTE();
+                Value operand = pop();
+                if (!IS_NUMBER(operand)) {
+                    string acc = "expected number as operand in '-";
+                    acc += object_to_string(operand);
+                    acc += "'";
+                    barley_exception("BadOperand", acc, READ_LINE());
+                    RUNTIME_ERROR();
+                };
+
+                switch (op) {
+                    case '-': push(NUMBER(-AS_NUMBER(operand)));
+                }
+                break;
+            }
+            case CONSTANT: {
+                Value constant = READ_CONSTANT();
+                push(constant);
+                break;
+            }
             case RETURN:
-                print("return");
+                print(object_to_string(pop()));
                 runtime_result = RUNTIME_OK;
                 return RUNTIME_OK;
-            case CONST:
-                Value constant = READ_CONSTANT();
-                print(object_to_string(constant));
-                break;
-
         }
     }
 }

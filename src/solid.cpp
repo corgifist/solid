@@ -27,13 +27,13 @@ string token_vector_to_string(vector<Token> toks) {
 int main() {
     Chunk chunk;
     initChunk(&chunk);
-    int position = writeConstant(&chunk, INT_VALUE(1));
-    int position2 = writeConstant(&chunk, INT_VALUE(2));
-    writeChunk(&chunk, CONST);
-    writeChunk(&chunk, position);
-    writeChunk(&chunk, CONST);
-    writeChunk(&chunk, position2);
-    writeChunk(&chunk, RETURN);
+    int position = writeConstant(&chunk, NUMBER(1));
+    int position2 = writeConstant(&chunk, NUMBER(2));
+    writeChunk(&chunk, CONSTANT, 1);
+    writeChunk(&chunk, position, 1);
+    writeChunk(&chunk, UNARY, 1);
+    writeChunk(&chunk, '-', 1);
+    writeChunk(&chunk, RETURN, 1);
     VM vm;
     disassemble(&chunk, "test chunk");
     initVM(&chunk);
