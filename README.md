@@ -1,2 +1,3 @@
 # solid
-Barley implementation in C++.
+
+Statically-typed programming language made for production-ready programs.
