@@ -4,6 +4,6 @@
 #include "parser/compiler.h"
 
 int main() {
-    parse("25 + 25 * 2");
+    parse("25 + 25 * 2;");
     return 0;
 }

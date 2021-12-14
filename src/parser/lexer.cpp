@@ -77,7 +77,6 @@ private:
     }
 
     void number() {
-        char current = peek(0);
         string acc;
         while (IS_DIGIT(peek(0)) || peek(0) == '.') {
             if (peek(0) == '.') {
@@ -105,16 +104,19 @@ public:
             switch (current) {
                 case '+':
                     addToken("PLUS", "+");
-                    break;
+                    NEXT();
                 case '-':
                     addToken("MINUS", "-");
-                    break;
+                    NEXT();
                 case '*':
                     addToken("STAR", "*");
-                    break;
+                    NEXT();
                 case '/':
                     addToken("SLASH", "/");
-                    break;
+                    NEXT();
+                case ';':
+                    addToken("SEMICOLON", ";");
+                    NEXT();
 
                 SKIP_WHITESPACES();
 
@@ -123,7 +125,6 @@ public:
                         number();
                     } else illegal_character(current);
             }
-            advance();
         }
         addToken("EOF", "\0");
         return result;

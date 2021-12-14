@@ -4,11 +4,20 @@
 #include "compiler.h"
 #include "parser.cpp"
 
+void dump_tokens(vector<Token> tokens) {
+    for (auto & token : tokens) {
+        print(token.asString());
+    }
+}
+
 void parse(const char* msg) {
     Lexer lexer = Lexer(msg);
     vector<Token> result = lexer.lex();
+    dump_tokens(result);
+    runtime_check();
     Parser parser = Parser(result);
     Chunk chunk = parser.parse();
+    runtime_check();
     disassemble(&chunk, "compiler test");
     initVM(&chunk);
     interpret();

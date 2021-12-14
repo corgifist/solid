@@ -17,13 +17,16 @@ typedef enum {
 
 #define SKIP_WHITESPACES() \
     case ' ': \
-        break; \
+        NEXT(); \
     case '\r': \
-        break; \
+        NEXT(); \
     case '\t': \
-        break; \
+        NEXT(); \
     case '\n': \
-        break
+        NEXT()
+
+#define NEXT() advance(); break
+
 #define CHAR_PTR(ch) (reinterpret_cast<uint8_t *>(ch))
 
 static double EXACT_OPERAND(Value operand) {

@@ -53,6 +53,16 @@ private:
         }
     }
 
+    Token consume(const TokenType& type, string msg) {
+        Token current = get(0);
+        if (current.getType() != type) {
+            parse_exception(msg, line());
+            return current;
+        }
+        pos++;
+        return current;
+    }
+
 public:
     explicit Parser(const vector<Token>& tokens) {
         this->tokens = tokens;
@@ -64,6 +74,7 @@ public:
     Chunk parse() {
         while(!match("EOF")) {
             expression();
+            consume("SEMICOLON", "expected ';' after expression");
         }
         writeChunk(&chunk, RETURN, line());
         return chunk;
