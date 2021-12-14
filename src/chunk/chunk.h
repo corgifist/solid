@@ -9,13 +9,15 @@
 
 typedef struct {
     int count, capacity;
-    uint8_t* code;
+    uint8_t *code;
     Constants constants;
-    int* lines;
+    int *lines;
 } Chunk;
 
-void initChunk(Chunk* chunk);
-void writeChunk(Chunk* chunk, uint8_t byte, int line);
-void freeChunk(Chunk* chunk);
+void initChunk(Chunk *chunk);
 
-int writeConstant(Chunk* chunk, Value value);
+void writeChunk(Chunk *chunk, uint8_t byte, int line);
+
+void freeChunk(Chunk *chunk);
+
+int writeConstant(Chunk *chunk, Value value);

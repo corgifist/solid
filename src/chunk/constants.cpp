@@ -4,13 +4,13 @@
 #include "constnants.h"
 #include "allocations.h"
 
-void initConstants(Constants* consts) {
+void initConstants(Constants *consts) {
     consts->count = 0;
     consts->capacity = 0;
     consts->values = NULL;
 }
 
-void writeConstants(Constants* consts, Value value) {
+void writeConstants(Constants *consts, Value value) {
     if (consts->capacity < consts->count + 1) {
         int old = consts->capacity;
         consts->capacity = GROW_CAPACITY(old);
@@ -21,7 +21,7 @@ void writeConstants(Constants* consts, Value value) {
     consts->count++;
 }
 
-void freeConstants(Constants * consts) {
-    FREE_ARRAY(Value , consts->values, consts->capacity);
+void freeConstants(Constants *consts) {
+    FREE_ARRAY(Value, consts->values, consts->capacity);
     initConstants(consts);
 }

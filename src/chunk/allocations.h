@@ -14,4 +14,4 @@
 #define FREE_ARRAY(type, pointer, oldCount) \
     reallocate(pointer, sizeof(type) * oldCount, 0)
 
-void* reallocate(void* pointer, size_t oldSize, size_t newSize);
+void *reallocate(void *pointer, size_t oldSize, size_t newSize);

@@ -2,13 +2,16 @@
 // Copyright 2021.
 
 #pragma once
+
 #include "../values/type.h"
 
 typedef struct {
     int count, capacity;
-    Value* values;
+    Value *values;
 } Constants;
 
-void initConstants(Constants* consts);
-void writeConstants(Constants* consts, Value value);
-void freeConstants(Constants* consts);
+void initConstants(Constants *consts);
+
+void writeConstants(Constants *consts, Value value);
+
+void freeConstants(Constants *consts);

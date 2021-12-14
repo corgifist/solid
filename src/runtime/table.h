@@ -8,6 +8,8 @@
 
 namespace Table {
     void put(string str, Value value);
+
     Value get(string str);
+
     void clear();
 }

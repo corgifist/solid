@@ -2,16 +2,15 @@
 // Copyright 2021.
 
 #include "debug.h"
-#include "../utils.h"
 
-void disassemble(Chunk* chunk, const char* name) {
+void disassemble(Chunk *chunk, const char *name) {
     print("Disassemble of " << name << ":");
     for (int offset = 0; offset < chunk->count;) {
         offset = offsetize(chunk, offset);
     }
 }
 
-int offsetize(Chunk* chunk, int offset) {
+int offsetize(Chunk *chunk, int offset) {
     int line = chunk->lines[offset];
     if (offset != 0) {
         if (chunk->lines[offset - 1] == line) {
@@ -33,14 +32,16 @@ int offsetize(Chunk* chunk, int offset) {
         case EXTRACT_BIND:
             return constOffset(offset, "EXTRACT_BIND", chunk);
         case UNARY:
-            return unaryOffset(offset, "UNARY", chunk);
+            return operatorOffset(offset, "UNARY", chunk);
+        case BINARY:
+            return operatorOffset(offset, "BINARY", chunk);
         default:
             return unknownOffset(offset);
     }
 }
 
 
-int simpleOffset(int offset, const char* name) {
+int simpleOffset(int offset, const char *name) {
     print(name);
     if (strcmp(name, "RETURN") == 0) {
         print("!");
@@ -53,13 +54,13 @@ int unknownOffset(int offset) {
     return offset + 1;
 }
 
-int constOffset(int offset, const char* name, Chunk* chunk) {
+int constOffset(int offset, const char *name, Chunk *chunk) {
     Value constant = chunk->constants.values[chunk->code[offset + 1]];
-    print(name << " " << size(constant) << " *" << &constant << " '" << object_to_string(constant) << "'");
+    print(name << " " << size(constant) << " %" << type(constant) << " " << " *" << &constant << " '" << object_to_string(constant) << "'");
     return offset + 2;
 }
 
-int unaryOffset(int offset, const char* name, Chunk* chunk) {
+int operatorOffset(int offset, const char *name, Chunk *chunk) {
     print(name << " '" << chunk->code[offset + 1] << "'");
     return offset + 2;
 }

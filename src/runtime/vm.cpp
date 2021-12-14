@@ -10,10 +10,11 @@
 #define READ_STRING() object_to_string(READ_CONSTANT())
 #define READ_LINE() (vm.chunk->lines[*vm.stage])
 #define RUNTIME_ERROR() runtime_result = RUNTIME_ERROR
+#define RUNTIME_OK() runtime_result = RUNTIME_OK
 
 VM vm;
 
-void initVM(Chunk* chunk) {
+void initVM(Chunk *chunk) {
     vm.chunk = chunk;
     vm.stage = vm.chunk->code;
     resetStack();
@@ -33,10 +34,35 @@ InterpretResult interpret() {
                 push(Table::get(READ_STRING()));
                 break;
             }
+            case BINARY: {
+                Value b = pop();
+                Value a = pop();
+                char op = READ_BYTE();
+                if (!(IS_NUMBER_SUBSET(a) && IS_NUMBER_SUBSET(b))) {
+                    string acc = "caught error while evaluating '";
+                    acc += object_to_string(a);
+                    acc += " ";
+                    acc += op;
+                    acc += " ";
+                    acc += object_to_string(b);
+                    acc += "'";
+                    barley_exception("BadOperand", acc, READ_LINE());
+                    RUNTIME_ERROR();
+                }
+                double operandA = EXACT_OPERAND(a);
+                double operandB = EXACT_OPERAND(b);
+                switch (op) {
+                    case '+': push(NUMBER_FROM_SOURCE(a, operandA + operandB)); break;
+                    case '-': push(NUMBER_FROM_SOURCE(a, operandA - operandB)); break;
+                    case '*': push(NUMBER_FROM_SOURCE(a, operandA * operandB)); break;
+                    case '/': push(NUMBER_FROM_SOURCE(a, operandA / operandB)); break;
+                }
+                break;
+            }
             case UNARY: {
                 Value operand = pop();
                 char op = READ_BYTE();
-                if (!IS_NUMBER(operand)) {
+                if (!IS_NUMBER_SUBSET(operand)) {
                     string acc = "expected number as operand in '-";
                     acc += object_to_string(operand);
                     acc += "'";
@@ -44,9 +70,12 @@ InterpretResult interpret() {
                     RUNTIME_ERROR();
                 };
 
+                double value = EXACT_OPERAND(operand);
 
                 switch (op) {
-                    case '-': push(NUMBER(-AS_NUMBER(operand))); break;
+                    case '-':
+                        push(NUMBER_FROM_SOURCE(operand, -value));
+                        break;
                     default: {
                         string acc = "this is a bug. unsupported operation '";
                         acc += op;
@@ -64,7 +93,7 @@ InterpretResult interpret() {
             }
             case RETURN:
                 print(object_to_string(pop()));
-                runtime_result = RUNTIME_OK;
+                RUNTIME_OK();
                 return RUNTIME_OK;
         }
     }

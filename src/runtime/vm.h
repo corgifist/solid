@@ -9,13 +9,14 @@
 #define S_SIZE 128
 
 typedef struct {
-    uint8_t* stage;
-    Chunk* chunk;
+    uint8_t *stage;
+    Chunk *chunk;
     Value stack[S_SIZE];
-    Value* stackTop;
+    Value *stackTop;
 } VM;
 
-void initVM(Chunk* chunk);
+void initVM(Chunk *chunk);
+
 void freeVM();
 
 InterpretResult interpret();
@@ -23,5 +24,6 @@ InterpretResult interpret();
 void resetStack();
 
 void push(Value value);
+
 Value pop();
 

@@ -10,9 +10,10 @@
 #include<cstring>
 #include<sstream>
 #include<stdint-gcc.h>
-#include "math.h"
+#include <cmath>
 
 #include "runtime.h"
+#include "utils.h"
 
 using namespace std;
 
@@ -20,7 +21,7 @@ using namespace std;
 
 static void barley_exception(string type, string msg, int line) {
     runtime_result = RUNTIME_ERROR;
-	print("** (" << type << ") " << msg << " at line " << line);
+    print("** (" << type << ") " << msg << " at line " << line);
 }
 
 static void system_exception(string type, string msg) {
