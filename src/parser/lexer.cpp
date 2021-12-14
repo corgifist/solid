@@ -2,6 +2,9 @@
 // Copyright 2021.
 
 #include "lexer.h"
+#include "../utils.h"
+
+#define LEXER_RUNTIME_ERROR() runtime_result = RUNTIME_ERROR
 
 class Token {
     TokenType type;
@@ -90,6 +93,22 @@ private:
         addToken(acc.find('.') == string::npos ? "INT" : "FLOAT", acc);
     }
 
+    void id() {
+        string acc;
+        while (IS_ID(peek(0)) || peek(0) == '!' || peek(0) == '?' || peek(0) == '_') {
+            acc += peek(0);
+            advance();
+        }
+
+        addToken("ID", acc);
+    }
+
+    void sync() {
+        while (!end()) {
+            advance();
+        }
+    }
+
 public:
     explicit Lexer(const char *source) {
         input = source;
@@ -117,13 +136,25 @@ public:
                 case ';':
                     addToken("SEMICOLON", ";");
                     NEXT();
-
+                case '(':
+                    addToken("LPAREN", "(");
+                    NEXT();
+                case ')':
+                    addToken("RPAREN", ")");
+                    NEXT();
                 SKIP_WHITESPACES();
 
                 default: // checks
                     if (IS_DIGIT(current)) {
                         number();
-                    } else illegal_character(current);
+                    } else if (IS_ID(current)) {
+                        id();
+                    } else {
+                        illegal_character(current);
+                        LEXER_RUNTIME_ERROR();
+                        sync();
+                        break;
+                    }
             }
         }
         addToken("EOF", "\0");

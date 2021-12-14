@@ -8,10 +8,17 @@
 #include <cstdlib>
 
 typedef struct {
+    int offset;
+    int line;
+} LineStart;
+
+typedef struct {
     int count, capacity;
     uint8_t *code;
     Constants constants;
-    int *lines;
+    int lineCount;
+    int lineCapacity;
+    LineStart* lines;
 } Chunk;
 
 void initChunk(Chunk *chunk);
@@ -20,4 +27,8 @@ void writeChunk(Chunk *chunk, uint8_t byte, int line);
 
 void freeChunk(Chunk *chunk);
 
-int writeConstant(Chunk *chunk, Value value);
+int addConstant(Chunk* chunk, Value value);
+
+int writeConstant(Chunk *chunk, Value value, int line);
+
+int getLine(Chunk* chunk, int instruction);

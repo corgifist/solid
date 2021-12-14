@@ -12,8 +12,10 @@ int offsetize(Chunk *chunk, int offset);
 
 int simpleOffset(int offset, const char *name);
 
-int unknownOffset(int offset);
+int unknownOffset(Chunk* chunk, int offset);
 
 int constOffset(int offset, const char *name, Chunk *chunk);
+
+int longConstOffset(int offset, const char* name, Chunk* chunk);
 
 int operatorOffset(int offset, const char *name, Chunk *chunk);

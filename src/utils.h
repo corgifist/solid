@@ -7,14 +7,14 @@
 #include "common.h"
 
 typedef enum {
-    RETURN, CONSTANT, UNARY, EXTRACT_BIND, BINARY
+    RETURN, CONSTANT, LONG_CONSTANT, UNARY, EXTRACT_BIND, BINARY
 } OpCode;
 
 #define SSTR(x) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
 
 #define IS_DIGIT(ch) ch >= '0' && ch <= '9'
-
+#define IS_ID(ch) isalnum(ch)
 #define SKIP_WHITESPACES() \
     case ' ': \
         NEXT(); \
@@ -71,8 +71,9 @@ static std::string object_to_string(Value value) {
         }
     }
     switch (value.type) {
-        case STRING:
+        case STRING: {
             return value.as.string;
+        }
         default:
             return "NULL";
     }
@@ -86,7 +87,7 @@ static size_t size(Value value) {
         case DOUBLE:
             return 24;
         case STRING:
-            return sizeof(value.as.string);
+            return sizeof(value.as.string) + sizeof(int);
         default:
             return 8;
     }
@@ -105,4 +106,5 @@ static const char* type(Value operand) {
         case STRING:
             return "string";
     }
+    return "NULL";
 }

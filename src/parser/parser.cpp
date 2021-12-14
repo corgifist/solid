@@ -4,6 +4,7 @@
 #include "parser.h"
 #include "lexer.cpp"
 #include "../chunk/chunk.h"
+#include "../runtime/table.h"
 
 #define PARSER_RUNTIME_ERROR() runtime_result = RUNTIME_ERROR
 
@@ -13,7 +14,7 @@ private:
     vector<Token> tokens;
     unsigned int pos, size;
     Chunk chunk;
-    Token EOF_TOKEN = Token("EOF", -1, "\0");
+    Token EOF_TOKEN = Token("EOF", 1, "\0");
 
     Token get(int rel) const {
         int final = pos + rel;
@@ -134,6 +135,18 @@ public:
         Token current = get(0);
         if (match("INT")) {
             emitConstant(INT(stoi(current.getText())));
+        } else if (match("FLOAT")) {
+            emitConstant(DOUBLE(stod(current.getType())));
+        } else if (match("ID")) {
+            // Copy token's text
+            string text = current.getText();
+            char* buffer = static_cast<char *>(malloc(sizeof(char) * text.length()));
+            for (int i = 0; i < text.length(); i++) {
+                buffer[i] = text.at(i);
+            }
+            buffer[text.length()] = '\0';
+            writeConstant(&chunk, STRING(buffer), line());
+            emitByte(EXTRACT_BIND);
             return;
         } else {
             parse_exception("unknown expression", line());
@@ -151,9 +164,7 @@ public:
     }
 
     void emitConstant(Value value) {
-        emitByte(CONSTANT);
-        int position = writeConstant(&chunk, value);
-        emitByte(position);
+        writeConstant(&chunk, value, line());
     }
 };
 

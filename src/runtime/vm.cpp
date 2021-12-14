@@ -3,12 +3,11 @@
 
 #include "vm.h"
 #include "table.h"
-#include<strings.h>
 
 #define READ_BYTE() (*vm.stage++)
 #define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE()])
-#define READ_STRING() object_to_string(READ_CONSTANT())
-#define READ_LINE() (vm.chunk->lines[*vm.stage])
+#define AS_STRING(obj) object_to_string(obj)
+#define READ_LINE() (getLine(vm.chunk, (int) *vm.stage))
 #define RUNTIME_ERROR() runtime_result = RUNTIME_ERROR
 #define RUNTIME_OK() runtime_result = RUNTIME_OK
 
@@ -27,11 +26,12 @@ void freeVM() {
 
 InterpretResult interpret() {
     for (;;) {
-        uint8_t instruction;
         runtime_check();
-        switch (instruction = READ_BYTE()) {
+        switch (READ_BYTE()) {
             case EXTRACT_BIND: {
-                push(Table::get(READ_STRING()));
+                string name = AS_STRING(pop());
+                print("name: " << name);
+                push(Table::get(name));
                 break;
             }
             case BINARY: {

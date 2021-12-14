@@ -11,9 +11,9 @@ void disassemble(Chunk *chunk, const char *name) {
 }
 
 int offsetize(Chunk *chunk, int offset) {
-    int line = chunk->lines[offset];
+    int line = getLine(chunk, offset);
     if (offset != 0) {
-        if (chunk->lines[offset - 1] == line) {
+        if (getLine(chunk, offset - 1) == line) {
             printf("| ");
         } else {
             printf("%d ", line);
@@ -29,28 +29,26 @@ int offsetize(Chunk *chunk, int offset) {
             return simpleOffset(offset, "RETURN");
         case CONSTANT:
             return constOffset(offset, "CONSTANT", chunk);
+        case LONG_CONSTANT:
+            return longConstOffset(offset, "LONG_CONSTANT", chunk);
         case EXTRACT_BIND:
-            return constOffset(offset, "EXTRACT_BIND", chunk);
+            return simpleOffset(offset, "EXTRACT_BIND");
         case UNARY:
             return operatorOffset(offset, "UNARY", chunk);
         case BINARY:
             return operatorOffset(offset, "BINARY", chunk);
         default:
-            return unknownOffset(offset);
+            return unknownOffset(chunk, offset);
     }
 }
-
 
 int simpleOffset(int offset, const char *name) {
     print(name);
-    if (strcmp(name, "RETURN") == 0) {
-        print("!");
-    }
     return offset + 1;
 }
 
-int unknownOffset(int offset) {
-    print("unknown opcode");
+int unknownOffset(Chunk* chunk,int offset) {
+    print("unknown opcode '" << chunk->code[offset] << "'");
     return offset + 1;
 }
 
@@ -58,6 +56,13 @@ int constOffset(int offset, const char *name, Chunk *chunk) {
     Value constant = chunk->constants.values[chunk->code[offset + 1]];
     print(name << " " << size(constant) << " %" << type(constant) << " " << " *" << &constant << " '" << object_to_string(constant) << "'");
     return offset + 2;
+}
+
+int longConstOffset(int offset, const char*name, Chunk* chunk) {
+    Value constant = chunk->constants.values[chunk->code[offset + 1] |
+                                             (chunk->code[offset + 2] << 8) |
+                                             (chunk->code[offset + 3] << 16)];
+    print(name << " " << size(constant) << " %" << type(constant) << " " << " *" << &constant << "'" << object_to_string(constant) << "'");
 }
 
 int operatorOffset(int offset, const char *name, Chunk *chunk) {
