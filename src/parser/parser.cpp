@@ -124,9 +124,16 @@ public:
         } else if (typedefs.contains(text)) {
             advance_parser();
             declare_by_type(typedefsGet(text));
+        } else if (match("PRINT")) {
+            printStatement();
         } else {
             assignment();
         }
+    }
+
+    void printStatement() {
+        expression();
+        emitByte(PRINT);
     }
 
     void assignment() {

@@ -8,7 +8,7 @@
 
 typedef enum {
     RETURN, CONSTANT, LONG_CONSTANT, UNARY, EXTRACT_BIND, BINARY,
-    POP, DECLARE_R_INT_32, DECLARE_R_INT_16, CAST, ASSIGN
+    POP, DECLARE_R_INT_32, DECLARE_R_INT_16, CAST, ASSIGN, PRINT
 } OpCode;
 
 #define SSTR(x) static_cast< std::ostringstream & >( \

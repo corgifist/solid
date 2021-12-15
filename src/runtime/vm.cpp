@@ -31,6 +31,10 @@ InterpretResult interpret() {
     for (;;) {
         runtime_check();
         switch (READ_BYTE()) {
+            case PRINT: {
+                print(object_to_string(pop()));
+                break;
+            }
             case CAST: {
                 Value expression = pop();
                 double operand = EXACT_OPERAND(expression);
@@ -152,7 +156,6 @@ InterpretResult interpret() {
                 break;
             }
             case RETURN:
-                print(object_to_string(pop()));
                 RUNTIME_OK();
                 return RUNTIME_OK;
         }

@@ -113,6 +113,7 @@ private:
         if (acc == "r_int32") addToken("R_INT32", "r_int32");
         else if (acc == "typedef") addToken("TYPEDEF", "typedef");
         else if (acc == "r_shrt16") addToken("R_SHRT16", "r_shrt16");
+        else if (acc == "print") addToken("PRINT", "print");
         else addToken("ID", acc);
     }
 
