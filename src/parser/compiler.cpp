@@ -21,4 +21,5 @@ void parse(const char* msg) {
     disassemble(&chunk, "compiler test");
     initVM(&chunk);
     interpret();
+    freeVM();
 }
