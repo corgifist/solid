@@ -64,6 +64,19 @@ private:
         return current;
     }
 
+    void identifierConstant(string text) {
+        char* buffer = static_cast<char *>(malloc(sizeof(char) * text.length()));
+        for (int i = 0; i < text.length(); i++) {
+            buffer[i] = text.at(i);
+        }
+        buffer[text.length()] = '\0';
+        emitByte(addConstant(&chunk, STRING(buffer)));
+    }
+
+    void advance_parser() {
+        match(get(0).getType());
+    }
+
 public:
     explicit Parser(const vector<Token>& tokens) {
         this->tokens = tokens;
@@ -74,11 +87,53 @@ public:
 
     Chunk parse() {
         while(!match("EOF")) {
-            expression();
+            declaration();
             consume("SEMICOLON", "expected ';' after expression");
         }
         writeChunk(&chunk, RETURN, line());
         return chunk;
+    }
+
+    void declaration() {
+        string text = get(0).getText();
+        if (match("R_INT32")) {
+            declare_int_32();
+        } else if (match("TYPEDEF")) {
+            declare_typedef();
+        } else if (typedefs.contains(text)) {
+            advance_parser();
+            declare_by_type(typedefsGet(text));
+        } else {
+            expressionStatement();
+        }
+    }
+
+    void declare_by_type(ValueType type) {
+        switch (type) {
+            case INT:
+                declare_int_32();
+                break;
+        }
+    }
+
+    void declare_typedef() {
+        string name = consume("ID", "expected typename after typedef keyword").getText();
+        consume("STABBER", "expected '->' after typedef's new type");
+        string source = consume(get(0).getType(), "expected typename after '->' in typedef declaration").getText();
+        typedefsPut(name, source);
+    }
+
+
+    void declare_int_32() {
+        string name = consume("ID", "expected identifier at r_int32 declaration").getText();
+        consume("EQ", "expected '=' after identifier at r_int32 declaration");
+        expression();
+        emitByte(DECLARE_R_INT_32);
+        identifierConstant(name);
+    }
+
+    void expressionStatement() {
+        expression();
     }
 
     void expression() {

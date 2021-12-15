@@ -11,5 +11,7 @@ namespace Table {
 
     Value get(string str);
 
+    bool contains(string str);
+
     void clear();
 }

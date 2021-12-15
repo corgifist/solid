@@ -7,7 +7,8 @@
 #include "common.h"
 
 typedef enum {
-    RETURN, CONSTANT, LONG_CONSTANT, UNARY, EXTRACT_BIND, BINARY
+    RETURN, CONSTANT, LONG_CONSTANT, UNARY, EXTRACT_BIND, BINARY,
+    POP, DECLARE_R_INT_32
 } OpCode;
 
 #define SSTR(x) static_cast< std::ostringstream & >( \
@@ -29,7 +30,24 @@ typedef enum {
 
 #define CHAR_PTR(ch) (reinterpret_cast<uint8_t *>(ch))
 
+static map<string, ValueType> typedefs;
 
+// TD is shortened typedef
+
+static ValueType stringToType(string source) {
+    const char* cstr = source.c_str();
+    if (strcmp(cstr, "r_int32") == 0) return INT;
+    else if (strcmp(cstr, "r_chr_ptr") == 0) return STRING;
+    return INT;
+}
+
+static void typedefsPut(string name, string source) {
+    typedefs[name] = stringToType(source);
+}
+
+static ValueType typedefsGet(string name) {
+    return typedefs[name];
+}
 
 static double EXACT_OPERAND(Value operand) {
     switch (operand.type) {
@@ -84,10 +102,13 @@ static std::string object_to_string(Value value) {
 static size_t size(Value value) {
     switch (value.type) {
         case SHORT:
+            return sizeof(short);
         case INT:
+            return sizeof(int);
         case LONG:
+            return sizeof(long);
         case DOUBLE:
-            return 24;
+            return sizeof(double);
         case STRING:
             return sizeof(value.as.string) + sizeof(int);
         default:

@@ -25,6 +25,8 @@ int offsetize(Chunk *chunk, int offset) {
     uint8_t instruction = chunk->code[offset];
     printf("%04d ", offset);
     switch (instruction) {
+        case DECLARE_R_INT_32:
+            return constOffset(offset, "DECLARE_R_INT_32", chunk);
         case RETURN:
             return simpleOffset(offset, "RETURN");
         case CONSTANT:
@@ -37,6 +39,8 @@ int offsetize(Chunk *chunk, int offset) {
             return operatorOffset(offset, "UNARY", chunk);
         case BINARY:
             return operatorOffset(offset, "BINARY", chunk);
+        case POP:
+            return simpleOffset(offset, "POP");
         default:
             return unknownOffset(chunk, offset);
     }

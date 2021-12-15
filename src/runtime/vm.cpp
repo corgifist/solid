@@ -10,6 +10,7 @@
 #define READ_LINE() (getLine(vm.chunk, (int) *vm.stage))
 #define RUNTIME_ERROR() runtime_result = RUNTIME_ERROR
 #define RUNTIME_OK() runtime_result = RUNTIME_OK
+#define CONSUME_EXPR(value, type_) (value.type == type_)
 
 VM vm;
 
@@ -28,12 +29,31 @@ InterpretResult interpret() {
     for (;;) {
         runtime_check();
         switch (READ_BYTE()) {
+            case DECLARE_R_INT_32: {
+                Value expression = pop();
+                string name = READ_STRING();
+                if (!CONSUME_EXPR(expression, INT)) {
+                    barley_exception("TypeMismatch", "excepted int in r_int32 declaration", READ_LINE());
+                    runtime_check();
+                }
+                Table::put(name, expression);
+                break;
+            }
+            case POP: pop(); break;
             case LONG_CONSTANT: {
                 push(SHORT(0));
                 break;
             }
             case EXTRACT_BIND: {
-                push(Table::get(READ_STRING()));
+                string var = READ_STRING();
+                if (!Table::contains(var)) {
+                    string acc = "undefined var '";
+                    acc += var;
+                    acc += "'";
+                    barley_exception("UndefinedVar", acc, READ_LINE());
+                    runtime_check();
+                }
+                push(Table::get(var));
                 break;
             }
             case BINARY: {
@@ -117,6 +137,10 @@ void push(Value value) {
 }
 
 Value pop() {
+    if (vm.stackCount == 0) {
+        barley_exception("StackEmpty", "stack is empty", READ_LINE());
+        runtime_check();
+    }
     vm.stackCount--;
     return vm.stack[vm.stackCount];
 }

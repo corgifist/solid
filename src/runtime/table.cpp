@@ -14,6 +14,10 @@ namespace Table {
         return table[key];
     }
 
+    bool contains(string key) {
+        return table.contains(key);
+    }
+
     void clear() {
         table.clear();
     }

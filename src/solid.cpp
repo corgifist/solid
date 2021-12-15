@@ -6,6 +6,6 @@
 
 int main() {
     Table::put("name", INT(1));
-    parse("2 + 2 * 2;");
+    parse("typedef int -> r_int32; r_int32 a = 5; int c = 12; a + c;");
     return 0;
 }

@@ -43,9 +43,11 @@ public:
 
 class Lexer {
 private:
+
     string input;
     unsigned int length, pos, line;
     vector<Token> result;
+    std::map<string, ValueType> typedefs;
 
     Token token(TokenType type, string msg) const {
         return Token(type, line, msg);
@@ -62,6 +64,14 @@ private:
         if (rest == '\n') line++;
         pos++;
         return rest;
+    }
+
+    bool match(char ch) {
+        char next = peek(1);
+        if (next == ch) {
+            advance();
+            return true;
+        } else return false;
     }
 
     bool end() const {
@@ -101,6 +111,7 @@ private:
         }
 
         if (acc == "r_int32") addToken("R_INT32", "r_int32");
+        else if (acc == "typedef") addToken("TYPEDEF", "typedef");
         else addToken("ID", acc);
     }
 
@@ -126,7 +137,8 @@ public:
                     addToken("PLUS", "+");
                     NEXT();
                 case '-':
-                    addToken("MINUS", "-");
+                    if (match('>')) addToken("STABBER", "->");
+                    else addToken("MINUS", "-");
                     NEXT();
                 case '*':
                     addToken("STAR", "*");
