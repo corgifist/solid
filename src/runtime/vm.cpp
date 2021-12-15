@@ -28,6 +28,10 @@ InterpretResult interpret() {
     for (;;) {
         runtime_check();
         switch (READ_BYTE()) {
+            case LONG_CONSTANT: {
+                push(SHORT(0));
+                break;
+            }
             case EXTRACT_BIND: {
                 push(Table::get(READ_STRING()));
                 break;
@@ -98,15 +102,21 @@ InterpretResult interpret() {
 }
 
 void resetStack() {
-    vm.stackTop = vm.stack;
+    vm.stackCount = 0;
 }
 
 void push(Value value) {
-    *vm.stackTop = value;
-    vm.stackTop++;
+    if (vm.stackCapacity < vm.stackCount + 1) {
+        int oldCapacity = vm.stackCapacity;
+        vm.stackCapacity = GROW_CAPACITY(oldCapacity);
+        vm.stack = GROW_ARRAY(Value, vm.stack, vm.stackCount, vm.stackCapacity);
+    }
+
+    vm.stack[vm.stackCount] = value;
+    vm.stackCount++;
 }
 
 Value pop() {
-    vm.stackTop--;
-    return *vm.stackTop;
+    vm.stackCount--;
+    return vm.stack[vm.stackCount];
 }

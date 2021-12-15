@@ -6,6 +6,6 @@
 
 int main() {
     Table::put("name", INT(1));
-    parse("name + name + 2;");
+    parse("2 + 2 * 2;");
     return 0;
 }

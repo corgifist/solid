@@ -6,13 +6,14 @@
 #include "../common.h"
 #include "../chunk/chunk.h"
 
-#define S_SIZE 128
+#define S_SIZE 2048
 
 typedef struct {
     uint8_t *stage;
     Chunk *chunk;
-    Value stack[S_SIZE];
-    Value *stackTop;
+    Value* stack;
+    int stackCount;
+    int stackCapacity;
 } VM;
 
 void initVM(Chunk *chunk);

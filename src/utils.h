@@ -14,7 +14,7 @@ typedef enum {
         ( std::ostringstream() << std::dec << x ) ).str()
 
 #define IS_DIGIT(ch) ch >= '0' && ch <= '9'
-#define IS_ID(ch) isalnum(ch)
+#define IS_ID(ch) isalnum(ch) || IS_DIGIT(ch)
 #define SKIP_WHITESPACES() \
     case ' ': \
         NEXT(); \
@@ -28,6 +28,8 @@ typedef enum {
 #define NEXT() advance(); break
 
 #define CHAR_PTR(ch) (reinterpret_cast<uint8_t *>(ch))
+
+
 
 static double EXACT_OPERAND(Value operand) {
     switch (operand.type) {

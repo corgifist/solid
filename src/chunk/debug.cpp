@@ -59,10 +59,12 @@ int constOffset(int offset, const char *name, Chunk *chunk) {
 }
 
 int longConstOffset(int offset, const char*name, Chunk* chunk) {
-    Value constant = chunk->constants.values[chunk->code[offset + 1] |
+    uint32_t index = chunk->code[offset + 1] |
                                              (chunk->code[offset + 2] << 8) |
-                                             (chunk->code[offset + 3] << 16)];
-    print(name << " " << size(constant) << " %" << type(constant) << " " << " *" << &constant << "'" << object_to_string(constant) << "'");
+                                             (chunk->code[offset + 3] << 16);
+    Value constant = chunk->constants.values[index];
+    print(name << " " << size(constant) << " %" << type(constant) << " " << " *" << &constant << " '" << object_to_string(constant) << "'");
+    return offset + 4;
 }
 
 int operatorOffset(int offset, const char *name, Chunk *chunk) {

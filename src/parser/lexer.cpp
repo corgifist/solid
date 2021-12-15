@@ -100,7 +100,8 @@ private:
             advance();
         }
 
-        addToken("ID", acc);
+        if (acc == "r_int32") addToken("R_INT32", "r_int32");
+        else addToken("ID", acc);
     }
 
     void sync() {
@@ -141,6 +142,9 @@ public:
                     NEXT();
                 case ')':
                     addToken("RPAREN", ")");
+                    NEXT();
+                case '=':
+                    addToken("EQ", "=");
                     NEXT();
                 SKIP_WHITESPACES();
 

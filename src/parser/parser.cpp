@@ -136,7 +136,7 @@ public:
         if (match("INT")) {
             emitConstant(INT(stoi(current.getText())));
         } else if (match("FLOAT")) {
-            emitConstant(DOUBLE(stod(current.getType())));
+            emitConstant(DOUBLE(stod(current.getType().c_str())));
         } else if (match("ID")) {
             // Copy token's text
             string text = current.getText();
