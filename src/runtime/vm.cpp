@@ -52,6 +52,48 @@ InterpretResult interpret() {
                 }
                 break;
             }
+            case DECLARE_R_CHR_PTR: {
+                Value expression = pop();
+                string name = READ_STRING();
+                if (vm.table.contains(name)) {
+                    barley_exception("DuplicateVariable", snt("variable '") + name + "' is already exists", READ_LINE());
+                    runtime_check();
+                }
+                if (!CONSUME_EXPR(expression, STRING)) {
+                    barley_exception("TypeMismatch", "excepted r_chr_ptr in runtime", READ_LINE());
+                    runtime_check();
+                }
+                vm.table.put(name, expression);
+                break;
+            }
+            case DECLARE_R_FLOAT_64: {
+                Value expression = pop();
+                string name = READ_STRING();
+                if (vm.table.contains(name)) {
+                    barley_exception("DuplicateVariable", snt("variable '") + name + "' is already exists", READ_LINE());
+                    runtime_check();
+                }
+                if (!CONSUME_EXPR(expression, DOUBLE)) {
+                    barley_exception("TypeMismatch", "excepted r_float64 in runtime", READ_LINE());
+                    runtime_check();
+                }
+                vm.table.put(name, expression);
+                break;
+            }
+            case DECLARE_R_INT_64: {
+                Value expression = pop();
+                string name = READ_STRING();
+                if (vm.table.contains(name)) {
+                    barley_exception("DuplicateVariable", snt("variable '") + name + "' is already exists", READ_LINE());
+                    runtime_check();
+                }
+                if (!CONSUME_EXPR(expression, LONG)) {
+                    barley_exception("TypeMismatch", "excepted r_int64 in runtime", READ_LINE());
+                    runtime_check();
+                }
+                vm.table.put(name, expression);
+                break;
+            }
             case DECLARE_R_INT_16: {
                 Value expression = pop();
                 string name = READ_STRING();

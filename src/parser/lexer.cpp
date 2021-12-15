@@ -113,8 +113,35 @@ private:
         if (acc == "r_int32") addToken("R_INT32", "r_int32");
         else if (acc == "typedef") addToken("TYPEDEF", "typedef");
         else if (acc == "r_shrt16") addToken("R_SHRT16", "r_shrt16");
+        else if (acc == "r_int64") addToken("R_INT64", "r_int64");
+        else if (acc == "r_float64") addToken("R_FLOAT64", "r_float64");
+        else if (acc == "r_chr_ptr") addToken("R_CHR_PTR", "r_chr_ptr");
         else if (acc == "print") addToken("PRINT", "print");
         else addToken("ID", acc);
+    }
+
+    void lex_string() {
+        string acc;
+
+        advance();
+        while (peek(0) != '"') {
+            char current = peek(0);
+            if (current == '\\') {
+                current = advance();
+                switch (current) {
+                    case '\\': acc += "\\"; break;
+                    case 'n': acc += "\n"; break;
+                    case 't': acc += "\t"; break;
+                    case 'r': acc += "\r"; break;
+                    case 'b': acc += "\b"; break;
+                }
+            }
+            else acc += current;
+            advance();
+        }
+        advance();
+
+        addToken("STRING", acc);
     }
 
     void sync() {
@@ -160,6 +187,9 @@ public:
                 case '=':
                     addToken("EQ", "=");
                     NEXT();
+                case '"':
+                    lex_string();
+                    break;
                 SKIP_WHITESPACES();
 
                 default: // checks

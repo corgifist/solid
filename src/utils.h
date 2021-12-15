@@ -8,7 +8,8 @@
 
 typedef enum {
     RETURN, CONSTANT, LONG_CONSTANT, UNARY, EXTRACT_BIND, BINARY,
-    POP, DECLARE_R_INT_32, DECLARE_R_INT_16, CAST, ASSIGN, PRINT
+    POP, DECLARE_R_INT_32, DECLARE_R_INT_16, DECLARE_R_INT_64,
+    CAST, ASSIGN, PRINT, DECLARE_R_FLOAT_64, DECLARE_R_CHR_PTR
 } OpCode;
 
 #define SSTR(x) static_cast< std::ostringstream & >( \
@@ -38,6 +39,8 @@ static ValueType stringToType(string source) {
     const char* cstr = source.c_str();
     if (strcmp(cstr, "r_int32") == 0) return INT;
     else if (strcmp(cstr, "r_shrt16") == 0) return SHORT;
+    else if (strcmp(cstr, "r_int64") == 0) return LONG;
+    else if (strcmp(cstr, "r_float64") == 0) return DOUBLE;
     else if (strcmp(cstr, "r_chr_ptr") == 0) return STRING;
     return INT;
 }

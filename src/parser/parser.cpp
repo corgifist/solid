@@ -87,6 +87,8 @@ private:
                 return "r_int64";
             case DOUBLE:
                 return "r_float64";
+            case STRING:
+                return "r_chr_ptr";
             default:
                 return "r_int32";
         }
@@ -126,9 +128,39 @@ public:
             declare_by_type(typedefsGet(text));
         } else if (match("PRINT")) {
             printStatement();
+        } else if (match("R_INT64")) {
+            declare_int_64();
+        } else if (match("R_FLOAT64")) {
+            declare_float_64();
+        } else if (match("R_CHR_PTR")) {
+            declare_chr_ptr();
         } else {
             assignment();
         }
+    }
+
+    void declare_chr_ptr() {
+        string name = consume("ID", "expected identifier at r_chr_ptr declaration").getText();
+        consume("EQ", "expected '=' after identifier at r_chr_ptr declaration");
+        expression();
+        emitByte(DECLARE_R_CHR_PTR);
+        identifierConstant(name);
+    }
+
+    void declare_float_64() {
+        string name = consume("ID", "expected identifier at r_float64 declaration").getText();
+        consume("EQ", "expected '=' after identifier at r_float64 declaration");
+        expression();
+        emitByte(DECLARE_R_FLOAT_64);
+        identifierConstant(name);
+    }
+
+    void declare_int_64() {
+        string name = consume("ID", "expected identifier at r_int64 declaration").getText();
+        consume("EQ", "expected '=' after identifier at r_int64 declaration");
+        expression();
+        emitByte(DECLARE_R_INT_64);
+        identifierConstant(name);
     }
 
     void printStatement() {
@@ -155,12 +187,21 @@ public:
             case INT:
                 declare_int_32();
                 break;
+            case LONG:
+                declare_int_64();
+                break;
+            case DOUBLE:
+                declare_float_64();
+                break;
+            case STRING:
+                declare_chr_ptr();
+                break;
         }
     }
 
     void declare_int_16() {
-        string name = consume("ID", "expected identifier at r_int16 declaration").getText();
-        consume("EQ", "expected '=' after identifier at r_int16 declaration");
+        string name = consume("ID", "expected identifier at r_shrt16 declaration").getText();
+        consume("EQ", "expected '=' after identifier at r_shrt16 declaration");
         expression();
         emitByte(DECLARE_R_INT_16);
         identifierConstant(name);
@@ -239,7 +280,7 @@ public:
     void primary() {
         Token current = get(0);
         if (match("INT")) {
-            emitConstant(INT(stoi(current.getText())));
+            emitConstant(INT(static_cast<int>(stol(current.getText()))));
         } else if (match("FLOAT")) {
             emitConstant(DOUBLE(stod(current.getText().c_str())));
         } else if (match("ID")) {
@@ -255,7 +296,7 @@ public:
             return;
         } else if (match("LPAREN")) {
             string maybeText = get(0).getText();
-            if (match("R_INT32") || match("R_SHRT16") || typedefs.contains(get(0).getText()) == 1) {
+            if (match("R_INT32") || match("R_SHRT16") || match("R_INT64") || match("R_FLOAT64") || typedefs.contains(get(0).getText()) == 1) {
                 if (typedefs.contains(get(0).getText())) advance_parser();
                 consume("RPAREN", "expected ')' after cast");
                 expression();
@@ -270,6 +311,15 @@ public:
             }
             expression();
             consume("RPAREN", "expected ')' after expression");
+            return;
+        } else if (match("STRING")) {
+            string text = current.getText();
+            char* buffer = static_cast<char *>(malloc(sizeof(char) * text.length()));
+            for (int i = 0; i < text.length(); i++) {
+                buffer[i] = text.at(i);
+            }
+            buffer[text.length()] = '\0';
+            emitConstant(STRING(buffer));
             return;
         } else {
             parse_exception("unknown expression", line());

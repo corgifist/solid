@@ -84,10 +84,8 @@ public:
         return genData(false, current);
     }
 
-    static ScopeData genData(bool isFound, const Scope& result) {
-        auto* scope = static_cast<Scope *>(malloc(sizeof(Scope) + 1));
-        scope[0] = result;
-        return ScopeData({isFound, scope});
+    static ScopeData genData(bool isFound, Scope& result) {
+        return ScopeData({isFound, &result});
     }
 
     static Variable genVariable(bool isConstant, Value value) {
