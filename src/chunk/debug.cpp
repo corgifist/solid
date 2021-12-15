@@ -45,6 +45,8 @@ int offsetize(Chunk *chunk, int offset) {
             return simpleOffset(offset, "POP");
         case CAST:
             return constOffset(offset, "CAST", chunk);
+        case ASSIGN:
+            return constOffset(offset, "ASSIGN", chunk);
         default:
             return unknownOffset(chunk, offset);
     }

@@ -6,12 +6,8 @@
 #include "../values/type.h"
 #include "../common.h"
 
-namespace Table {
-    void put(string str, Value value);
+typedef struct {
+    bool isConstant;
+    Value value;
+} Variable;
 
-    Value get(string str);
-
-    bool contains(string str);
-
-    void clear();
-}

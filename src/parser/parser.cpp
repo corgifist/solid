@@ -80,7 +80,7 @@ private:
     string valueTypeFromString(ValueType type) {
         switch (type) {
             case SHORT:
-                return "r_int16";
+                return "r_shrt16";
             case INT:
                 return "r_int32";
             case LONG:
@@ -90,6 +90,10 @@ private:
             default:
                 return "r_int32";
         }
+    }
+
+    bool lookMatch(int rel, TokenType type) {
+        return get(rel).getType() == type;
     }
 
 public:
@@ -120,6 +124,17 @@ public:
         } else if (typedefs.contains(text)) {
             advance_parser();
             declare_by_type(typedefsGet(text));
+        } else {
+            assignment();
+        }
+    }
+
+    void assignment() {
+        if (lookMatch(0, "ID") && lookMatch(1, "EQ")) {
+            identifierConstant(consume("ID", "").getText());
+            consume("EQ", "expected '=' after id in assignment");
+            expression();
+            emitByte(ASSIGN);
         } else {
             expressionStatement();
         }

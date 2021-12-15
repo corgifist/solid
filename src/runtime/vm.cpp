@@ -18,6 +18,7 @@ VM vm;
 void initVM(Chunk *chunk) {
     vm.chunk = chunk;
     vm.stage = vm.chunk->code;
+    vm.table = Table();
     resetStack();
 }
 
@@ -50,38 +51,47 @@ InterpretResult interpret() {
             case DECLARE_R_INT_16: {
                 Value expression = pop();
                 string name = READ_STRING();
+                if (vm.table.contains(name)) {
+                    barley_exception("DuplicateVariable", snt("variable '") + name + "' is already exists", READ_LINE());
+                    runtime_check();
+                }
                 if (!CONSUME_EXPR(expression, SHORT)) {
                     barley_exception("TypeMismatch", "excepted short in runtime", READ_LINE());
                     runtime_check();
                 }
-                Table::put(name, expression);
+                vm.table.put(name, expression);
                 break;
             }
             case DECLARE_R_INT_32: {
                 Value expression = pop();
                 string name = READ_STRING();
+                if (vm.table.contains(name)) {
+                    barley_exception("DuplicateVariable", snt("variable '") + name + "' is already exists", READ_LINE());
+                    runtime_check();
+                }
                 if (!CONSUME_EXPR(expression, INT)) {
                     barley_exception("TypeMismatch", "excepted int in r_int32 declaration", READ_LINE());
                     runtime_check();
                 }
-                Table::put(name, expression);
+                vm.table.put(name, expression);
                 break;
             }
             case POP: pop(); break;
             case LONG_CONSTANT: {
-                push(SHORT(0));
+                uint32_t index = vm.chunk->code[READ_BYTE()] |
+                                 (vm.chunk->code[READ_BYTE()] << 8) |
+                                 (vm.chunk->code[READ_BYTE()] << 16);
+                Value constant = vm.chunk->constants.values[index];
+                push(constant);
                 break;
             }
             case EXTRACT_BIND: {
                 string var = READ_STRING();
-                if (!Table::contains(var)) {
-                    string acc = "undefined var '";
-                    acc += var;
-                    acc += "'";
-                    barley_exception("UndefinedVar", acc, READ_LINE());
+                if (!vm.table.contains(var)) {
+                    barley_exception("UndefinedVar", snt("undefined variable '") + var + "'", READ_LINE());
                     runtime_check();
                 }
-                push(Table::get(var));
+                push(vm.table.get(var));
                 break;
             }
             case BINARY: {

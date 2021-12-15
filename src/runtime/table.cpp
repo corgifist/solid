@@ -3,23 +3,95 @@
 
 #include "table.h"
 
-std::map<string, Value> table;
+#include <utility>
 
-namespace Table {
-    void put(string key, Value value) {
-        table[key] = value;
+class Scope {
+public:
+
+    const Scope* scope;
+    map<string, Variable> variables;
+    bool isLast;
+
+    Scope() {
+        this->scope = nullptr;
+        this->isLast = true;
     }
 
-    Value get(string key) {
-        return table[key];
+    Scope(const Scope *pScope) {
+        this->scope = pScope;
+        this->isLast = false;
     }
+};
 
-    bool contains(string key) {
-        return table.contains(key);
+typedef struct {
+    bool isFound;
+    Scope* scope;
+} ScopeData;
+
+class Table {
+    Scope scope;
+
+public:
+    Table() {
+        this->scope = Scope();
     }
 
     void clear() {
-        table.clear();
+        scope.variables.clear();
     }
-}
+
+    void push() {
+        scope = Scope(scope);
+    }
+
+    void pop() {
+        if (!scope.isLast) {
+            this->scope = scope.scope;
+        }
+    }
+
+    void put(const string& key, Value value) {
+        Scope sc = findScope(key).scope;
+        scope.variables[key] = genVariable(false, value);
+    }
+
+    void constant(const string& key, Value value) {
+        Scope sc = findScope(key).scope;
+        scope.variables[key] = genVariable(true, value);
+    }
+
+    Variable getVariable(const string& key) {
+        return findScope(key).scope->variables[key];
+    }
+
+    Value get(const string& key) {
+        return findScope(key).scope->variables[key].value;
+    }
+
+    bool contains(const string& key) {
+        return findScope(key).isFound;
+    }
+
+    ScopeData findScope(const string& var) {
+        Scope current = scope;
+        do {
+            if (current.variables.contains(var)) {
+                return genData(true, scope);
+            }
+            current = current.scope;
+        } while (current.isLast);
+
+        return genData(false, current);
+    }
+
+    static ScopeData genData(bool isFound, const Scope& result) {
+        auto* scope = static_cast<Scope *>(malloc(sizeof(Scope) + 1));
+        scope[0] = result;
+        return ScopeData({isFound, scope});
+    }
+
+    static Variable genVariable(bool isConstant, Value value) {
+        return Variable ({isConstant, value});
+    }
+};
 

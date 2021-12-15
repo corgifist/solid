@@ -5,6 +5,7 @@
 
 #include "../common.h"
 #include "../chunk/chunk.h"
+#include "table.cpp"
 
 #define S_SIZE 2048
 
@@ -14,6 +15,7 @@ typedef struct {
     Value* stack;
     int stackCount;
     int stackCapacity;
+    Table table;
 } VM;
 
 void initVM(Chunk *chunk);
