@@ -77,6 +77,21 @@ private:
         match(get(0).getType());
     }
 
+    string valueTypeFromString(ValueType type) {
+        switch (type) {
+            case SHORT:
+                return "r_int16";
+            case INT:
+                return "r_int32";
+            case LONG:
+                return "r_int64";
+            case DOUBLE:
+                return "r_float64";
+            default:
+                return "r_int32";
+        }
+    }
+
 public:
     explicit Parser(const vector<Token>& tokens) {
         this->tokens = tokens;
@@ -98,6 +113,8 @@ public:
         string text = get(0).getText();
         if (match("R_INT32")) {
             declare_int_32();
+        } else if (match("R_SHRT16")) {
+            declare_int_16();
         } else if (match("TYPEDEF")) {
             declare_typedef();
         } else if (typedefs.contains(text)) {
@@ -110,10 +127,21 @@ public:
 
     void declare_by_type(ValueType type) {
         switch (type) {
+            case SHORT:
+                declare_int_16();
+                break;
             case INT:
                 declare_int_32();
                 break;
         }
+    }
+
+    void declare_int_16() {
+        string name = consume("ID", "expected identifier at r_int16 declaration").getText();
+        consume("EQ", "expected '=' after identifier at r_int16 declaration");
+        expression();
+        emitByte(DECLARE_R_INT_16);
+        identifierConstant(name);
     }
 
     void declare_typedef() {
@@ -191,7 +219,7 @@ public:
         if (match("INT")) {
             emitConstant(INT(stoi(current.getText())));
         } else if (match("FLOAT")) {
-            emitConstant(DOUBLE(stod(current.getType().c_str())));
+            emitConstant(DOUBLE(stod(current.getText().c_str())));
         } else if (match("ID")) {
             // Copy token's text
             string text = current.getText();
@@ -202,6 +230,24 @@ public:
             buffer[text.length()] = '\0';
             emitByte(EXTRACT_BIND);
             emitByte(addConstant(&chunk, STRING(buffer)));
+            return;
+        } else if (match("LPAREN")) {
+            string maybeText = get(0).getText();
+            if (match("R_INT32") || match("R_SHRT16") || typedefs.contains(get(0).getText()) == 1) {
+                if (typedefs.contains(get(0).getText())) advance_parser();
+                consume("RPAREN", "expected ')' after cast");
+                expression();
+                emitByte(CAST);
+                if (typedefs.contains(maybeText)) {
+                    string type = valueTypeFromString(typedefs[maybeText]);
+                    identifierConstant(type);
+                } else {
+                    identifierConstant(maybeText);
+                }
+                return;
+            }
+            expression();
+            consume("RPAREN", "expected ')' after expression");
             return;
         } else {
             parse_exception("unknown expression", line());

@@ -8,7 +8,7 @@
 
 typedef enum {
     RETURN, CONSTANT, LONG_CONSTANT, UNARY, EXTRACT_BIND, BINARY,
-    POP, DECLARE_R_INT_32
+    POP, DECLARE_R_INT_32, DECLARE_R_INT_16, CAST
 } OpCode;
 
 #define SSTR(x) static_cast< std::ostringstream & >( \
@@ -37,6 +37,7 @@ static map<string, ValueType> typedefs;
 static ValueType stringToType(string source) {
     const char* cstr = source.c_str();
     if (strcmp(cstr, "r_int32") == 0) return INT;
+    else if (strcmp(cstr, "r_shrt16") == 0) return SHORT;
     else if (strcmp(cstr, "r_chr_ptr") == 0) return STRING;
     return INT;
 }

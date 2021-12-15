@@ -11,6 +11,7 @@
 #define RUNTIME_ERROR() runtime_result = RUNTIME_ERROR
 #define RUNTIME_OK() runtime_result = RUNTIME_OK
 #define CONSUME_EXPR(value, type_) (value.type == type_)
+#define snt(strin) string(strin)
 
 VM vm;
 
@@ -29,6 +30,33 @@ InterpretResult interpret() {
     for (;;) {
         runtime_check();
         switch (READ_BYTE()) {
+            case CAST: {
+                Value expression = pop();
+                double operand = EXACT_OPERAND(expression);
+                const char* type = READ_STRING().c_str();
+                if (strcmp(type, "r_shrt16") == 0) {
+                    push(SHORT((short) operand));
+                } else if (strcmp(type, "r_int32") == 0) {
+                    push(INT((int) operand));
+                } else if (strcmp(type, "r_int64") == 0) {
+                    push(LONG((long) operand));
+                } else if (strcmp(type, "r_float64") == 0) {
+                    push(DOUBLE(operand));
+                } else {
+                    barley_exception("UndefinedType", snt("undefined type '") + snt(type) + snt("'"), READ_LINE());
+                }
+                break;
+            }
+            case DECLARE_R_INT_16: {
+                Value expression = pop();
+                string name = READ_STRING();
+                if (!CONSUME_EXPR(expression, SHORT)) {
+                    barley_exception("TypeMismatch", "excepted short in runtime", READ_LINE());
+                    runtime_check();
+                }
+                Table::put(name, expression);
+                break;
+            }
             case DECLARE_R_INT_32: {
                 Value expression = pop();
                 string name = READ_STRING();
