@@ -145,8 +145,8 @@ public:
                 buffer[i] = text.at(i);
             }
             buffer[text.length()] = '\0';
-            writeConstant(&chunk, STRING(buffer), line());
             emitByte(EXTRACT_BIND);
+            emitByte(addConstant(&chunk, STRING(buffer)));
             return;
         } else {
             parse_exception("unknown expression", line());

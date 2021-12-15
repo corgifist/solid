@@ -6,7 +6,7 @@
 
 #define READ_BYTE() (*vm.stage++)
 #define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE()])
-#define AS_STRING(obj) object_to_string(obj)
+#define READ_STRING() object_to_string(READ_CONSTANT())
 #define READ_LINE() (getLine(vm.chunk, (int) *vm.stage))
 #define RUNTIME_ERROR() runtime_result = RUNTIME_ERROR
 #define RUNTIME_OK() runtime_result = RUNTIME_OK
@@ -29,9 +29,7 @@ InterpretResult interpret() {
         runtime_check();
         switch (READ_BYTE()) {
             case EXTRACT_BIND: {
-                string name = AS_STRING(pop());
-                print("name: " << name);
-                push(Table::get(name));
+                push(Table::get(READ_STRING()));
                 break;
             }
             case BINARY: {

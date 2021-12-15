@@ -32,7 +32,7 @@ int offsetize(Chunk *chunk, int offset) {
         case LONG_CONSTANT:
             return longConstOffset(offset, "LONG_CONSTANT", chunk);
         case EXTRACT_BIND:
-            return simpleOffset(offset, "EXTRACT_BIND");
+            return constOffset(offset, "EXTRACT_BIND", chunk);
         case UNARY:
             return operatorOffset(offset, "UNARY", chunk);
         case BINARY:
