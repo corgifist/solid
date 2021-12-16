@@ -47,9 +47,39 @@ InterpretResult interpret() {
                     push(LONG((long) operand));
                 } else if (strcmp(type, "r_float64") == 0) {
                     push(DOUBLE(operand));
+                } else if (strcmp(type, "r_byte8") == 0) {
+                    push(BYTE((unsigned char) operand));
                 } else {
                     barley_exception("UndefinedType", snt("undefined type '") + snt(type) + snt("'"), READ_LINE());
                 }
+                break;
+            }
+            case DECLARE_R_BYTE_8: {
+                Value expression = pop();
+                string name = READ_STRING();
+                if (vm.table.contains(name)) {
+                    barley_exception("DuplicateVariable", snt("variable '") + name + "' is already exists", READ_LINE());
+                    runtime_check();
+                }
+                if (!CONSUME_EXPR(expression, BYTE)) {
+                    barley_exception("TypeMismatch", "excepted r_byte8 in runtime", READ_LINE());
+                    runtime_check();
+                }
+                vm.table.put(name, expression);
+                break;
+            }
+            case DECLARE_R_BOOL_1: {
+                Value expression = pop();
+                string name = READ_STRING();
+                if (vm.table.contains(name)) {
+                    barley_exception("DuplicateVariable", snt("variable '") + name + "' is already exists", READ_LINE());
+                    runtime_check();
+                }
+                if (!CONSUME_EXPR(expression, BOOL)) {
+                    barley_exception("TypeMismatch", "excepted r_bool1 in runtime", READ_LINE());
+                    runtime_check();
+                }
+                vm.table.put(name, expression);
                 break;
             }
             case DECLARE_R_CHR_PTR: {

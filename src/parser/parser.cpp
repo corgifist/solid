@@ -91,6 +91,10 @@ private:
                 return "r_float64";
             case STRING:
                 return "r_chr_ptr";
+            case BOOL:
+                return "r_bool1";
+            case BYTE:
+                return "r_byte8";
             default:
                 return "r_int32";
         }
@@ -112,6 +116,13 @@ public:
         typedefsPut("long", "r_int64");
         typedefsPut("float", "r_float64");
         typedefsPut("string", "r_chr_ptr");
+        typedefsPut("bool", "r_bool1");
+        typedefsPut("byte", "r_byte8");
+    }
+
+    void statementOrBlock() {
+        if (lookMatch(0, "LBRACE")) block();
+        else declaration();
     }
 
     void block() {
@@ -156,9 +167,29 @@ public:
             declare_chr_ptr();
         } else if (lookMatch(0, "LBRACE")) {
             block();
+        } else if (match("R_BOOL1")) {
+            declare_r_bool1();
+        } else if (match("R_BYTE8")) {
+            declare_r_byte_8();
         } else {
             assignment();
         }
+    }
+
+    void declare_r_bool1() {
+        string name = consume("ID", "expected identifier at r_bool1 declaration").getText();
+        consume("EQ", "expected '=' after identifier at r_bool1 declaration");
+        expression();
+        emitByte(DECLARE_R_BYTE_8);
+        identifierConstant(name);
+    }
+
+    void declare_r_byte_8() {
+        string name = consume("ID", "expected identifier at r_byte8 declaration").getText();
+        consume("EQ", "expected '=' after identifier at r_byte8 declaration");
+        expression();
+        emitByte(DECLARE_R_BYTE_8);
+        identifierConstant(name);
     }
 
     void declare_chr_ptr() {
@@ -217,6 +248,12 @@ public:
                 break;
             case STRING:
                 declare_chr_ptr();
+                break;
+            case BOOL:
+                declare_r_bool1();
+                break;
+            case BYTE:
+                declare_r_byte_8();
                 break;
         }
     }
@@ -318,7 +355,7 @@ public:
             return;
         } else if (match("LPAREN")) {
             string maybeText = get(0).getText();
-            if (match("R_INT32") || match("R_SHRT16") || match("R_INT64") || match("R_FLOAT64") || typedefs.contains(get(0).getText()) == 1) {
+            if (match("R_INT32") || match("R_SHRT16") || match("R_INT64") || match("R_FLOAT64") || match("R_BYTE8") || typedefs.contains(get(0).getText()) == 1) {
                 if (typedefs.contains(get(0).getText())) advance_parser();
                 consume("RPAREN", "expected ')' after cast");
                 expression();
@@ -343,6 +380,10 @@ public:
             buffer[text.length()] = '\0';
             emitConstant(STRING(buffer));
             return;
+        } else if (match("TRUE")) {
+            emitConstant(BOOL(true));
+        } else if (match("FALSE")) {
+            emitConstant(BOOL(false));
         } else {
             parse_exception("unknown expression", line());
             return;

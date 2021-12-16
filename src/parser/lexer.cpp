@@ -117,6 +117,10 @@ private:
         else if (acc == "r_float64") addToken("R_FLOAT64", "r_float64");
         else if (acc == "r_chr_ptr") addToken("R_CHR_PTR", "r_chr_ptr");
         else if (acc == "print") addToken("PRINT", "print");
+        else if (acc == "true") addToken("TRUE", "true");
+        else if (acc == "false") addToken("FALSE", "false");
+        else if (acc == "r_bool1") addToken("R_BOOL1", "r_bool1");
+        else if (acc == "r_byte8") addToken("R_BYTE8", "r_byte8");
         else addToken("ID", acc);
     }
 

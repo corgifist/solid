@@ -1,4 +1,4 @@
-{
-    int a = 5;
-    print a;
-};
+
+byte my_byte = (byte) -2;
+
+print my_byte;

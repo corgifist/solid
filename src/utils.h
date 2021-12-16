@@ -10,7 +10,7 @@ typedef enum {
     RETURN, CONSTANT, LONG_CONSTANT, UNARY, EXTRACT_BIND, BINARY,
     POP, DECLARE_R_INT_32, DECLARE_R_INT_16, DECLARE_R_INT_64,
     CAST, ASSIGN, PRINT, DECLARE_R_FLOAT_64, DECLARE_R_CHR_PTR,
-    SCOPE_START, SCOPE_END
+    DECLARE_R_BOOL_1, DECLARE_R_BYTE_8, SCOPE_START, SCOPE_END
 } OpCode;
 
 #define SSTR(x) static_cast< std::ostringstream & >( \
@@ -44,6 +44,8 @@ static ValueType stringToType(const string& source) {
     else if (strcmp(cstr, "r_int64") == 0) return LONG;
     else if (strcmp(cstr, "r_float64") == 0) return DOUBLE;
     else if (strcmp(cstr, "r_chr_ptr") == 0) return STRING;
+    else if (strcmp(cstr, "r_bool1") == 0) return BOOL;
+    else if (strcmp(cstr, "r_byte8") == 0) return BYTE;
     return INT;
 }
 
@@ -63,6 +65,8 @@ static double EXACT_OPERAND(Value operand) {
             return (double) operand.as.nt;
         case LONG:
             return (double) operand.as.lng;
+        case BYTE:
+            return (double) operand.as.byte;
         case DOUBLE:
             return operand.as.dbl;
     }
@@ -71,6 +75,8 @@ static double EXACT_OPERAND(Value operand) {
 
 static Value NUMBER_FROM_SOURCE(Value source, double operand) {
     switch (source.type) {
+        case BYTE:
+            return BYTE((unsigned char) operand);
         case SHORT:
             return SHORT((short) operand);
         case INT:
@@ -94,12 +100,16 @@ static std::string object_to_string(Value value) {
                 return SSTR(value.as.lng);
             case DOUBLE:
                 return SSTR(value.as.dbl);
+            case BYTE:
+                return SSTR((int) value.as.byte);
         }
     }
     switch (value.type) {
         case STRING: {
             return value.as.string;
         }
+        case BOOL:
+            return SSTR(value.as.boolean);
         default:
             return "NULL";
     }
@@ -117,6 +127,10 @@ static size_t size(Value value) {
             return sizeof(double);
         case STRING:
             return sizeof(value.as.string) + sizeof(int);
+        case BOOL:
+            return sizeof(bool);
+        case BYTE:
+            return sizeof(unsigned char);
         default:
             return 8;
     }
@@ -134,6 +148,10 @@ static const char* type(Value operand) {
             return "double";
         case STRING:
             return "string";
+        case BOOL:
+            return "bool";
+        case BYTE:
+            return "byte";
     }
     return "NULL";
 }
