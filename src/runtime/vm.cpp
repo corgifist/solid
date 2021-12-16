@@ -240,6 +240,15 @@ InterpretResult interpret() {
                 Value b = pop();
                 Value a = pop();
                 char op = READ_BYTE();
+                if (CONSUME_EXPR(a, STRING) || CONSUME_EXPR(b, STRING)) {
+                    switch (op) {
+                        case '+': concat(a, b); break;
+                        default:
+                            barley_exception("BadOperand", snt("unsupported operation '") + op + "' for strings", READ_LINE());
+                            break;
+                    }
+                    break;
+                }
                 if (!(IS_NUMBER_SUBSET(a) && IS_NUMBER_SUBSET(b))) {
                     string acc = "caught error while evaluating '";
                     acc += object_to_string(a);
@@ -298,6 +307,10 @@ InterpretResult interpret() {
                 return RUNTIME_OK;
         }
     }
+}
+
+void concat(Value a, Value b) {
+    push(STRING((snt(a.as.string) + snt(b.as.string)).c_str()));
 }
 
 void resetStack() {

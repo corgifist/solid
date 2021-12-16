@@ -24,6 +24,8 @@ void freeVM();
 
 InterpretResult interpret();
 
+void concat(Value a, Value b);
+
 void resetStack();
 
 void push(Value value);

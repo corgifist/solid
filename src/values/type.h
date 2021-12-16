@@ -45,5 +45,6 @@ typedef struct {
 #define UNSIGNED_INT(value) ((Value) {UNSIGNED_INT, {.unnt = value}})
 #define UNSIGNED_LONG(value) ((Value) {UNSIGNED_LONG, {.unlgn = value}})
 
+
 #define IS_NUMBER_SUBSET(value) (value.type == SHORT || value.type == INT || value.type == LONG || value.type == DOUBLE || value.type == BYTE) || \
     (value.type == UNSIGNED_BYTE || value.type == UNSIGNED_SHORT || value.type == UNSIGNED_INT || value.type == UNSIGNED_LONG)

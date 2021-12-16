@@ -1,2 +1,2 @@
-unsigned_byte bt = (unsigned_byte) -2;
-print bt;
+string name = "John";
+print "My name is " + name;
