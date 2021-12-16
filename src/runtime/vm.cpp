@@ -8,6 +8,7 @@
 #define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE()])
 #define READ_STRING() object_to_string(READ_CONSTANT())
 #define READ_LINE() (getLine(vm.chunk, (int) *vm.stage))
+#define READ_SHORT() (vm.stage += 2, (uint16_t)((vm.stage[-2] << 8) | vm.stage[-1]))
 #define RUNTIME_ERROR() runtime_result = RUNTIME_ERROR
 #define RUNTIME_OK() runtime_result = RUNTIME_OK
 #define CONSUME_EXPR(value, type_) (value.type == type_)
@@ -31,6 +32,18 @@ InterpretResult interpret() {
     for (;;) {
         runtime_check();
         switch (READ_BYTE()) {
+            case JUMP_ANYWAY: {
+                uint16_t offset = READ_SHORT();
+                vm.stage += offset;
+                break;
+            }
+            case JUMP_IF_FALSE: {
+                uint16_t offset = READ_SHORT();
+                if (isFalse(pop())) vm.stage += offset;
+//                print("object: " << object_to_string(peek(0)));
+//                print("is false:  " << isFalse(peek(0)));
+                break;
+            }
             case PRINT: {
                 print(object_to_string(pop()));
                 break;
@@ -241,8 +254,12 @@ InterpretResult interpret() {
                 Value a = pop();
                 char op = READ_BYTE();
                 if (CONSUME_EXPR(a, STRING) || CONSUME_EXPR(b, STRING)) {
+                    string as = snt(a.as.string);
+                    string bs = snt(b.as.string);
                     switch (op) {
                         case '+': concat(a, b); break;
+                        case '!': push(BOOL(as != bs)); break;
+                        case '=': push(BOOL(as == bs)); break;
                         default:
                             barley_exception("BadOperand", snt("unsupported operation '") + op + "' for strings", READ_LINE());
                             break;
@@ -267,6 +284,12 @@ InterpretResult interpret() {
                     case '-': push(NUMBER_FROM_SOURCE(a, operandA - operandB)); break;
                     case '*': push(NUMBER_FROM_SOURCE(a, operandA * operandB)); break;
                     case '/': push(NUMBER_FROM_SOURCE(a, operandA / operandB)); break;
+                    case '>': push(BOOL(operandA > operandB)); break;
+                    case '<': push(BOOL(operandA < operandB)); break;
+                    case '=': push(BOOL(operandA == operandB)); break;
+                    case 'g': push(BOOL(operandA >= operandB)); break;
+                    case 'l': push(BOOL(operandA <= operandB)); break;
+                    case '!': push(BOOL(operandA != operandB)); break;
                 }
                 break;
             }
@@ -279,7 +302,7 @@ InterpretResult interpret() {
                     acc += "'";
                     barley_exception("BadOperand", acc, READ_LINE());
                     RUNTIME_ERROR();
-                };
+                }
 
                 double value = EXACT_OPERAND(operand);
 
@@ -335,4 +358,12 @@ Value pop() {
     }
     vm.stackCount--;
     return vm.stack[vm.stackCount];
+}
+
+Value peek(int relative) {
+    return vm.stack[vm.stackCount + relative];
+}
+
+bool isFalse(Value value) {
+    return object_to_string(value) == "0";
 }

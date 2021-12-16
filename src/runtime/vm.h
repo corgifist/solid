@@ -32,3 +32,7 @@ void push(Value value);
 
 Value pop();
 
+Value peek(int relative);
+
+bool isFalse(Value value);
+

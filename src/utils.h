@@ -12,7 +12,7 @@ typedef enum {
     CAST, ASSIGN, PRINT, DECLARE_R_FLOAT_64, DECLARE_R_CHR_PTR,
     DECLARE_R_BOOL_1, DECLARE_R_BYTE_8, SCOPE_START, SCOPE_END,
     DECLARE_U_BYTE_8, DECLARE_U_SHRT_16, DECLARE_U_INT_32,
-    DECLARE_U_INT_64
+    DECLARE_U_INT_64, JUMP_IF_FALSE, JUMP_ANYWAY
 } OpCode;
 
 #define SSTR(x) dynamic_cast< std::ostringstream & >( \
@@ -139,7 +139,7 @@ static std::string object_to_string(Value value) {
             return value.as.string;
         }
         case BOOL:
-            return SSTR(value.as.boolean);
+            return value.as.boolean ? "1" : "0";
         default:
             return "NULL";
     }

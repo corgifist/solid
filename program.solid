@@ -1,2 +1,14 @@
-string name = "John";
-print "My name is " + name;
+
+if ("a" == "b") {
+    print "equals";
+} else {
+    print "not equals!";
+};
+
+if ("a" != "b") {
+    print "not equals yay!";
+} else {
+    print "equals!";
+};
+
+print 5 == 5 and 1 == 1;

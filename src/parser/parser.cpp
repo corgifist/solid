@@ -112,6 +112,25 @@ private:
         return get(rel).getType() == type;
     }
 
+    int emitJump(uint8_t instruction) {
+        emitByte(instruction);
+        emitBytes(0xff, 0xff);
+        return chunk.count - 2;
+    }
+
+    void patchJump(int offset) {
+        int jump = chunk.count - offset - 2;
+
+        if (jump > 65333) {
+            barley_exception("JumpFailure", "too much code to jump over", line());
+            PARSER_RUNTIME_ERROR();
+            runtime_check();
+        }
+
+        chunk.code[offset] = (jump >> 8) & 0xff;
+        chunk.code[offset + 1] = jump & 0xff;
+    }
+
 public:
     explicit Parser(const vector<Token>& tokens) {
         this->tokens = tokens;
@@ -191,9 +210,29 @@ public:
             declare_u_int_32();
         } else if (match("U_INT64")) {
             declare_u_int_64();
+        } else if (match("IF")) {
+            declare_if();
         } else {
             assignment();
         }
+    }
+
+    void declare_if() {
+        consume("LPAREN", "expected '(' after 'if'");
+        expression();
+        consume("RPAREN", "expected ')' after 'if'");
+
+        int thenJump = emitJump(JUMP_IF_FALSE);
+
+        statementOrBlock();
+
+        int elseJump = emitJump(JUMP_ANYWAY);
+
+        patchJump(thenJump);
+
+        if (match("ELSE")) statementOrBlock();
+
+        patchJump(elseJump);
     }
 
     void declare_u_int_64() {
@@ -348,10 +387,53 @@ public:
 
     void expressionStatement() {
         expression();
+        emitByte(POP);
     }
 
     void expression() {
+        and_();
+    }
+
+    void and_() {
+        condition();
+
+        while (true) {
+            if (match("AND")) {
+                int endJump = emitJump(JUMP_IF_FALSE);
+                expression();
+                patchJump(endJump);
+                continue;
+            }
+            break;
+        }
+    }
+
+    void condition() {
         additive();
+
+        if (match("EQEQ")) {
+            additive();
+            emitBinary('=');
+            return;
+        }
+
+        if (match("GTEQ")) {
+            additive();
+            emitBinary('g');
+            return;
+        }
+
+        if (match("LTEQ")) {
+            additive();
+            emitBinary('l');
+            return;
+        }
+
+        if (match("EXCLEQ")) {
+            additive();
+            emitByte('!');
+            return;
+        }
     }
 
     void additive() {

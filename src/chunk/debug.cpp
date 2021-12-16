@@ -3,6 +3,8 @@
 
 #include "debug.h"
 
+int jumpOffset(int offset, int sign, const char *string, Chunk *chunk);
+
 void disassemble(Chunk *chunk, const char *name) {
     print("Disassemble of " << name << ":");
     for (int offset = 0; offset < chunk->count;) {
@@ -61,6 +63,10 @@ int offsetize(Chunk *chunk, int offset) {
             return operatorOffset(offset, "BINARY", chunk);
         case POP:
             return simpleOffset(offset, "POP");
+        case JUMP_ANYWAY:
+            return jumpOffset(offset, 1, "JUMP_ANYWAY", chunk);
+        case JUMP_IF_FALSE:
+            return jumpOffset(offset, 1, "JUMP_IF_FALSE", chunk);
         case CAST:
             return constOffset(offset, "CAST", chunk);
         case ASSIGN:
@@ -76,6 +82,13 @@ int offsetize(Chunk *chunk, int offset) {
     }
 }
 
+int jumpOffset(int offset, int sign, const char *string, Chunk *chunk) {
+    uint16_t jump = (uint16_t)(chunk->code[offset + 1] << 8);
+    jump |= chunk->code[offset + 2];
+    print(string << " " << offset << " >> " << offset + 3 + sign * jump);
+    return offset + 3;
+}
+
 int simpleOffset(int offset, const char *name) {
     print(name);
     return offset + 1;
@@ -88,7 +101,7 @@ int unknownOffset(Chunk* chunk,int offset) {
 
 int constOffset(int offset, const char *name, Chunk *chunk) {
     Value constant = chunk->constants.values[chunk->code[offset + 1]];
-    print(name << " " << size(constant) << " %" << type(constant) << " " << " *" << &constant << " '" << object_to_string(constant) << "'");
+    print(name << " " << size(constant) << " %" << type(constant) << " " << " *" << &offset << " '" << object_to_string(constant) << "'");
     return offset + 2;
 }
 
