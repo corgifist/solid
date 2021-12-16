@@ -1,4 +1,11 @@
-
-byte my_byte = (byte) -2;
-
-print my_byte;
+print "Solid types!";
+byte age = (byte) 18;
+print age;
+int count = 254;
+print count;
+long millions = (long) 40000000;
+print millions;
+float pi = 3.14;
+print pi;
+string name = "john";
+print name;
