@@ -48,10 +48,74 @@ InterpretResult interpret() {
                 } else if (strcmp(type, "r_float64") == 0) {
                     push(DOUBLE(operand));
                 } else if (strcmp(type, "r_byte8") == 0) {
-                    push(BYTE((unsigned char) operand));
+                    push(BYTE((char) operand));
+                } else if (strcmp(type, "u_byte8") == 0) {
+                    push(UNSIGNED_BYTE((unsigned char) operand));
+                } else if (strcmp(type, "u_shrt16") == 0) {
+                    push(UNSIGNED_SHORT((unsigned short) operand));
+                } else if (strcmp(type, "u_int32") == 0) {
+                    push(UNSIGNED_INT((unsigned int) operand));
+                } else if (strcmp(type, "u_int64") == 0) {
+                    push(UNSIGNED_LONG((unsigned long) operand));
                 } else {
                     barley_exception("UndefinedType", snt("undefined type '") + snt(type) + snt("'"), READ_LINE());
                 }
+                break;
+            }
+            case DECLARE_U_INT_64: {
+                Value expression = pop();
+                string name = READ_STRING();
+                if (vm.table.contains(name)) {
+                    barley_exception("DuplicateVariable", snt("variable '") + name + "' is already exists", READ_LINE());
+                    runtime_check();
+                }
+                if (!CONSUME_EXPR(expression, UNSIGNED_LONG)) {
+                    barley_exception("TypeMismatch", "excepted u_int64 in runtime", READ_LINE());
+                    runtime_check();
+                }
+                vm.table.put(name, expression);
+                break;
+            }
+            case DECLARE_U_INT_32: {
+                Value expression = pop();
+                string name = READ_STRING();
+                if (vm.table.contains(name)) {
+                    barley_exception("DuplicateVariable", snt("variable '") + name + "' is already exists", READ_LINE());
+                    runtime_check();
+                }
+                if (!CONSUME_EXPR(expression, UNSIGNED_INT)) {
+                    barley_exception("TypeMismatch", "excepted u_int32 in runtime", READ_LINE());
+                    runtime_check();
+                }
+                vm.table.put(name, expression);
+                break;
+            }
+            case DECLARE_U_SHRT_16: {
+                Value expression = pop();
+                string name = READ_STRING();
+                if (vm.table.contains(name)) {
+                    barley_exception("DuplicateVariable", snt("variable '") + name + "' is already exists", READ_LINE());
+                    runtime_check();
+                }
+                if (!CONSUME_EXPR(expression, UNSIGNED_SHORT)) {
+                    barley_exception("TypeMismatch", "excepted u_shrt16 in runtime", READ_LINE());
+                    runtime_check();
+                }
+                vm.table.put(name, expression);
+                break;
+            }
+            case DECLARE_U_BYTE_8: {
+                Value expression = pop();
+                string name = READ_STRING();
+                if (vm.table.contains(name)) {
+                    barley_exception("DuplicateVariable", snt("variable '") + name + "' is already exists", READ_LINE());
+                    runtime_check();
+                }
+                if (!CONSUME_EXPR(expression, UNSIGNED_BYTE)) {
+                    barley_exception("TypeMismatch", "excepted u_byte8 in runtime", READ_LINE());
+                    runtime_check();
+                }
+                vm.table.put(name, expression);
                 break;
             }
             case DECLARE_R_BYTE_8: {

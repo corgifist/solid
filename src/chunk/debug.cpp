@@ -39,6 +39,14 @@ int offsetize(Chunk *chunk, int offset) {
             return constOffset(offset, "DECLARE_R_BOOL_1", chunk);
         case DECLARE_R_BYTE_8:
             return constOffset(offset, "DECLARE_R_BYTE_8", chunk);
+        case DECLARE_U_BYTE_8:
+            return constOffset(offset, "DECLARE_U_BYTE_8", chunk);
+        case DECLARE_U_SHRT_16:
+            return constOffset(offset, "DECLARE_U_SHRT_16", chunk);
+        case DECLARE_U_INT_32:
+            return constOffset(offset, "DECLARE_U_INT_32", chunk);
+        case DECLARE_U_INT_64:
+            return constOffset(offset, "DECLARE_U_INT_64", chunk);
         case RETURN:
             return simpleOffset(offset, "RETURN");
         case CONSTANT:

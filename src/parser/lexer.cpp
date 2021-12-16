@@ -121,6 +121,10 @@ private:
         else if (acc == "false") addToken("FALSE", "false");
         else if (acc == "r_bool1") addToken("R_BOOL1", "r_bool1");
         else if (acc == "r_byte8") addToken("R_BYTE8", "r_byte8");
+        else if (acc == "u_byte8") addToken("U_BYTE8", "u_byte8");
+        else if (acc == "u_shrt16") addToken("U_SHRT16", "u_shrt16");
+        else if (acc == "u_int32") addToken("U_INT32", "u_int32");
+        else if (acc == "u_int64") addToken("U_INT64", "u_int64");
         else addToken("ID", acc);
     }
 

@@ -1,11 +1,2 @@
-print "Solid types!";
-byte age = (byte) 18;
-print age;
-int count = 254;
-print count;
-long millions = (long) 40000000;
-print millions;
-float pi = 3.14;
-print pi;
-string name = "john";
-print name;
+unsigned_byte bt = (unsigned_byte) -2;
+print bt;

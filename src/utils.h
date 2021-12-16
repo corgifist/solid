@@ -10,10 +10,12 @@ typedef enum {
     RETURN, CONSTANT, LONG_CONSTANT, UNARY, EXTRACT_BIND, BINARY,
     POP, DECLARE_R_INT_32, DECLARE_R_INT_16, DECLARE_R_INT_64,
     CAST, ASSIGN, PRINT, DECLARE_R_FLOAT_64, DECLARE_R_CHR_PTR,
-    DECLARE_R_BOOL_1, DECLARE_R_BYTE_8, SCOPE_START, SCOPE_END
+    DECLARE_R_BOOL_1, DECLARE_R_BYTE_8, SCOPE_START, SCOPE_END,
+    DECLARE_U_BYTE_8, DECLARE_U_SHRT_16, DECLARE_U_INT_32,
+    DECLARE_U_INT_64
 } OpCode;
 
-#define SSTR(x) static_cast< std::ostringstream & >( \
+#define SSTR(x) dynamic_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
 
 #define IS_DIGIT(ch) ch >= '0' && ch <= '9'
@@ -46,6 +48,10 @@ static ValueType stringToType(const string& source) {
     else if (strcmp(cstr, "r_chr_ptr") == 0) return STRING;
     else if (strcmp(cstr, "r_bool1") == 0) return BOOL;
     else if (strcmp(cstr, "r_byte8") == 0) return BYTE;
+    else if (strcmp(cstr, "u_byte8") == 0) return UNSIGNED_BYTE;
+    else if (strcmp(cstr, "u_shrt16") == 0) return UNSIGNED_SHORT;
+    else if (strcmp(cstr, "u_int32") == 0) return UNSIGNED_INT;
+    else if (strcmp(cstr, "u_int64") == 0) return UNSIGNED_LONG;
     return INT;
 }
 
@@ -69,6 +75,14 @@ static double EXACT_OPERAND(Value operand) {
             return (double) operand.as.byte;
         case DOUBLE:
             return operand.as.dbl;
+        case UNSIGNED_BYTE:
+            return (double) operand.as.unbyte;
+        case UNSIGNED_SHORT:
+            return (double) operand.as.unshr;
+        case UNSIGNED_INT:
+            return (double) operand.as.unnt;
+        case UNSIGNED_LONG:
+            return (double) operand.as.unlgn;
     }
     return 0;
 }
@@ -76,13 +90,21 @@ static double EXACT_OPERAND(Value operand) {
 static Value NUMBER_FROM_SOURCE(Value source, double operand) {
     switch (source.type) {
         case BYTE:
-            return BYTE((unsigned char) operand);
+            return BYTE((char) operand);
         case SHORT:
             return SHORT((short) operand);
         case INT:
             return INT((int) operand);
         case LONG:
             return LONG((long) operand);
+        case UNSIGNED_BYTE:
+            return UNSIGNED_BYTE((unsigned char) operand);
+        case UNSIGNED_INT:
+            return UNSIGNED_INT((unsigned int) operand);
+        case UNSIGNED_SHORT:
+            return UNSIGNED_SHORT((unsigned short) operand);
+        case UNSIGNED_LONG:
+            return UNSIGNED_LONG((unsigned long) operand);
         case DOUBLE:
         default:
             return DOUBLE(operand);
@@ -102,6 +124,14 @@ static std::string object_to_string(Value value) {
                 return SSTR(value.as.dbl);
             case BYTE:
                 return SSTR((int) value.as.byte);
+            case UNSIGNED_BYTE:
+                return SSTR((unsigned int) value.as.unbyte);
+            case UNSIGNED_SHORT:
+                return SSTR(value.as.unshr);
+            case UNSIGNED_INT:
+                return SSTR(value.as.unnt);
+            case UNSIGNED_LONG:
+                return SSTR(value.as.unlgn);
         }
     }
     switch (value.type) {
@@ -131,6 +161,14 @@ static size_t size(Value value) {
             return sizeof(bool);
         case BYTE:
             return sizeof(unsigned char);
+        case UNSIGNED_BYTE:
+            return sizeof(unsigned char);
+        case UNSIGNED_SHORT:
+            return sizeof(unsigned short);
+        case UNSIGNED_INT:
+            return sizeof(unsigned int);
+        case UNSIGNED_LONG:
+            return sizeof(unsigned long);
         default:
             return 8;
     }
@@ -152,6 +190,14 @@ static const char* type(Value operand) {
             return "bool";
         case BYTE:
             return "byte";
+        case UNSIGNED_BYTE:
+            return "u_byte";
+        case UNSIGNED_SHORT:
+            return "u_short";
+        case UNSIGNED_INT:
+            return "u_int";
+        case UNSIGNED_LONG:
+            return "u_long";
     }
     return "NULL";
 }

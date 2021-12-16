@@ -95,6 +95,14 @@ private:
                 return "r_bool1";
             case BYTE:
                 return "r_byte8";
+            case UNSIGNED_BYTE:
+                return "u_byte8";
+            case UNSIGNED_SHORT:
+                return "u_shrt16";
+            case UNSIGNED_INT:
+                return "u_int32";
+            case UNSIGNED_LONG:
+                return "u_int64";
             default:
                 return "r_int32";
         }
@@ -118,6 +126,10 @@ public:
         typedefsPut("string", "r_chr_ptr");
         typedefsPut("bool", "r_bool1");
         typedefsPut("byte", "r_byte8");
+        typedefsPut("unsigned_byte", "u_byte8");
+        typedefsPut("unsigned_short", "u_shrt16");
+        typedefsPut("unsigned_int", "u_int32");
+        typedefsPut("unsigned_long", "u_int64");
     }
 
     void statementOrBlock() {
@@ -171,16 +183,56 @@ public:
             declare_r_bool1();
         } else if (match("R_BYTE8")) {
             declare_r_byte_8();
+        } else if (match("U_BYTE8")) {
+            declare_u_byte_8();
+        } else if (match("U_SHRT16")) {
+            declare_u_shrt_16();
+        } else if (match("U_INT32")) {
+            declare_u_int_32();
+        } else if (match("U_INT64")) {
+            declare_u_int_64();
         } else {
             assignment();
         }
+    }
+
+    void declare_u_int_64() {
+        string name = consume("ID", "expected identifier at u_int64 declaration").getText();
+        consume("EQ", "expected '=' after identifier at u_int64 declaration");
+        expression();
+        emitByte(DECLARE_U_INT_64);
+        identifierConstant(name);
+    }
+
+    void declare_u_int_32() {
+        string name = consume("ID", "expected identifier at u_int32 declaration").getText();
+        consume("EQ", "expected '=' after identifier at u_int32 declaration");
+        expression();
+        emitByte(DECLARE_U_INT_32);
+        identifierConstant(name);
+    }
+
+    void declare_u_shrt_16() {
+        string name = consume("ID", "expected identifier at u_shrt16 declaration").getText();
+        consume("EQ", "expected '=' after identifier at u_shrt16 declaration");
+        expression();
+        emitByte(DECLARE_U_SHRT_16);
+        identifierConstant(name);
+    }
+
+    void declare_u_byte_8() {
+        string name = consume("ID", "expected identifier at u_byte8 declaration").getText();
+        consume("EQ", "expected '=' after identifier at u_byte8 declaration");
+        expression();
+        emitByte(DECLARE_U_BYTE_8);
+        identifierConstant(name);
     }
 
     void declare_r_bool1() {
         string name = consume("ID", "expected identifier at r_bool1 declaration").getText();
         consume("EQ", "expected '=' after identifier at r_bool1 declaration");
         expression();
-        emitByte(DECLARE_R_BYTE_8);
+        emitByte(DECLARE_R_BOOL_1);
         identifierConstant(name);
     }
 
@@ -254,6 +306,18 @@ public:
                 break;
             case BYTE:
                 declare_r_byte_8();
+                break;
+            case UNSIGNED_BYTE:
+                declare_u_byte_8();
+                break;
+            case UNSIGNED_SHORT:
+                declare_u_shrt_16();
+                break;
+            case UNSIGNED_INT:
+                declare_u_int_32();
+                break;
+            case UNSIGNED_LONG:
+                declare_u_int_64();
                 break;
         }
     }
@@ -355,7 +419,8 @@ public:
             return;
         } else if (match("LPAREN")) {
             string maybeText = get(0).getText();
-            if (match("R_INT32") || match("R_SHRT16") || match("R_INT64") || match("R_FLOAT64") || match("R_BYTE8") || typedefs.contains(get(0).getText()) == 1) {
+            if (match("R_INT32") || match("R_SHRT16") || match("R_INT64") || match("R_FLOAT64") || match("R_BYTE8") ||
+            match("U_BYTE8") || match("U_SHRT16") || match("U_INT32") || match("U_INT64") || typedefs.contains(get(0).getText()) == 1) {
                 if (typedefs.contains(get(0).getText())) advance_parser();
                 consume("RPAREN", "expected ')' after cast");
                 expression();
