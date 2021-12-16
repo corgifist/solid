@@ -2,6 +2,8 @@
 // Copyright 2021.
 
 #include "parser.h"
+
+#include <utility>
 #include "lexer.cpp"
 #include "../chunk/chunk.h"
 #include "../runtime/table.h"
@@ -48,7 +50,7 @@ private:
         sync();
     }
 
-    void sync() {
+     void sync() {
         while (!match("EOF")) {
             match(get(0).getType());
         }
@@ -57,7 +59,7 @@ private:
     Token consume(const TokenType& type, string msg) {
         Token current = get(0);
         if (current.getType() != type) {
-            parse_exception(msg, line());
+            parse_exception(std::move(msg), line());
             return current;
         }
         pos++;
@@ -104,6 +106,24 @@ public:
         this->pos = 0;
         this->size = tokens.size();
         initChunk(&chunk);
+
+        typedefsPut("short", "r_shrt16");
+        typedefsPut("int", "r_int32");
+        typedefsPut("long", "r_int64");
+        typedefsPut("float", "r_float64");
+        typedefsPut("string", "r_chr_ptr");
+    }
+
+    void block() {
+        consume("LBRACE", "expected '{' in block expression");
+        emitByte(SCOPE_START);
+        while (!match("RBRACE")) {
+            declaration();
+            consume("SEMICOLON", "unterminated expression in block");
+            runtime_check();
+        }
+
+        emitByte(SCOPE_END);
     }
 
     Chunk parse() {
@@ -134,6 +154,8 @@ public:
             declare_float_64();
         } else if (match("R_CHR_PTR")) {
             declare_chr_ptr();
+        } else if (lookMatch(0, "LBRACE")) {
+            block();
         } else {
             assignment();
         }

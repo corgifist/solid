@@ -5,91 +5,80 @@
 
 #include <utility>
 
-class Scope {
-public:
+typedef struct Local {
+    int depth{};
+    string name;
+    Variable variable{};
 
-    const Scope* scope;
-    map<string, Variable> variables;
-    bool isLast;
-
-    Scope() {
-        this->scope = nullptr;
-        this->isLast = true;
+    [[nodiscard]] string toString() const {
+        return name + " " + to_string(depth);
     }
 
-    Scope(const Scope *pScope) {
-        this->scope = pScope;
-        this->isLast = false;
+    [[nodiscard]] bool isValid() const {
+        return name.empty();
     }
-};
-
-typedef struct {
-    bool isFound;
-    Scope* scope;
-} ScopeData;
+} Local;
 
 class Table {
-    Scope scope;
+    int depth;
+    int count;
+    Local locals[512];
 
 public:
     Table() {
-        this->scope = Scope();
+        this->depth = 1;
+        this->count = 0;
     }
 
-    void clear() {
-        scope.variables.clear();
+    void put(string name, Value value) {
+        Local local = genLocal(false, value, std::move(name));
+        this->locals[this->count++] = local;
+    }
+
+    Value get(const string& name) {
+        for (const Local& local : locals) {
+            if (local.name == name) {
+                return local.variable.value;
+            }
+        }
+        return INT(0);
     }
 
     void push() {
-        scope = Scope(scope);
+        this->depth++;
     }
 
     void pop() {
-        if (!scope.isLast) {
-            this->scope = scope.scope;
+        Local newLocals[512];
+        this->depth--;
+        for (int i = 0; i < 512; i++) {
+            if (locals[i].depth < this->depth) continue;
+            newLocals[i] = locals[i];
+        }
+        for (int i = 0; i < 512; i++) {
+            this->locals[i] = newLocals[i];
         }
     }
 
-    void put(const string& key, Value value) {
-        Scope sc = findScope(key).scope;
-        scope.variables[key] = genVariable(false, value);
+    bool contains(const string& name) {
+       for (const Local& local : locals) {
+           if (local.name.empty()) break;
+           if (local.name == name) {
+               return true;
+           }
+       }
+
+       return false;
     }
 
-    void constant(const string& key, Value value) {
-        Scope sc = findScope(key).scope;
-        scope.variables[key] = genVariable(true, value);
+    static Local genLocal(bool constant, Value value, string name) {
+        Local local;
+        local.name = std::move(name);
+        local.variable = genVar(value, constant);
+        return local;
     }
 
-    Variable getVariable(const string& key) {
-        return findScope(key).scope->variables[key];
-    }
-
-    Value get(const string& key) {
-        return findScope(key).scope->variables[key].value;
-    }
-
-    bool contains(const string& key) {
-        return findScope(key).isFound;
-    }
-
-    ScopeData findScope(const string& var) {
-        Scope current = scope;
-        do {
-            if (current.variables.contains(var)) {
-                return genData(true, scope);
-            }
-            current = current.scope;
-        } while (current.isLast);
-
-        return genData(false, current);
-    }
-
-    static ScopeData genData(bool isFound, Scope& result) {
-        return ScopeData({isFound, &result});
-    }
-
-    static Variable genVariable(bool isConstant, Value value) {
-        return Variable ({isConstant, value});
+    static Variable genVar(Value value, bool constant) {
+        return Variable({constant, value});
     }
 };
-

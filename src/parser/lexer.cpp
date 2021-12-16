@@ -134,6 +134,7 @@ private:
                     case 't': acc += "\t"; break;
                     case 'r': acc += "\r"; break;
                     case 'b': acc += "\b"; break;
+                    default: acc += "\\"; break;
                 }
             }
             else acc += current;
@@ -190,6 +191,13 @@ public:
                 case '"':
                     lex_string();
                     break;
+                case '{':
+                    addToken("LBRACE", "{");
+                    NEXT();
+                case '}':
+                    addToken("RBRACE", "}");
+                    NEXT();
+
                 SKIP_WHITESPACES();
 
                 default: // checks

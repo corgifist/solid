@@ -1,9 +1,4 @@
-typedef short -> r_shrt16;
-typedef int -> r_int32;
-typedef long -> r_int64;
-typedef float -> r_float64;
-typedef string -> r_chr_ptr;
-
-string hello = "Hello, World!";
-
-print hello;
+{
+    int a = 5;
+    print a;
+};

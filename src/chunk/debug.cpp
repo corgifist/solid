@@ -55,6 +55,10 @@ int offsetize(Chunk *chunk, int offset) {
             return constOffset(offset, "ASSIGN", chunk);
         case PRINT:
             return simpleOffset(offset, "PRINT");
+        case SCOPE_START:
+            return simpleOffset(offset, "SCOPE_START");
+        case SCOPE_END:
+            return simpleOffset(offset, "SCOPE_END");
         default:
             return unknownOffset(chunk, offset);
     }

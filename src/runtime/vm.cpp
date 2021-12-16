@@ -123,6 +123,8 @@ InterpretResult interpret() {
                 break;
             }
             case POP: pop(); break;
+            case SCOPE_START: vm.table.push(); break;
+            case SCOPE_END: vm.table.pop(); break;
             case LONG_CONSTANT: {
                 uint32_t index = vm.chunk->code[READ_BYTE()] |
                                  (vm.chunk->code[READ_BYTE()] << 8) |
