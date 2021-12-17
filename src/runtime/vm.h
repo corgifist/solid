@@ -16,6 +16,7 @@ typedef struct {
     int stackCount;
     int stackCapacity;
     Table table;
+    bool constant;
 } VM;
 
 void initVM(Chunk *chunk);

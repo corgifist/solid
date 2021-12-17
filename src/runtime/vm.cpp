@@ -32,6 +32,35 @@ InterpretResult interpret() {
     for (;;) {
         runtime_check();
         switch (READ_BYTE()) {
+            case ASSIGN: {
+                Value expression = pop();
+                string name = READ_STRING();
+                if (!vm.table.contains(name)) {
+                    barley_exception("UndefinedVariable", snt("undefined variable '") + name + "' to assign", READ_LINE());
+                    RUNTIME_ERROR();
+                    runtime_check();
+                }
+
+                if (vm.table.isConstant(name)) {
+                    barley_exception("ConstantModifier", snt("unable to assign value to variable with constant modifier"), READ_LINE());
+                    RUNTIME_ERROR();
+                    runtime_check();
+                }
+
+                ValueType sourceType = vm.table.get(name).type;
+                if (!CONSUME_EXPR(expression, sourceType)) {
+                    barley_exception("TypeMismatch", snt("compatible types '") + type(expression) + "' and '" + type(vm.table.get(name)) + "'", READ_LINE());
+                    RUNTIME_ERROR();
+                    runtime_check();
+                }
+
+                vm.table.put(name, expression);
+                break;
+            }
+            case CONSTANTIFY: {
+                vm.constant = true;
+                break;
+            }
             case JUMP_ANYWAY: {
                 uint16_t offset = READ_SHORT();
                 vm.stage += offset;
@@ -40,8 +69,6 @@ InterpretResult interpret() {
             case JUMP_IF_FALSE: {
                 uint16_t offset = READ_SHORT();
                 if (isFalse(pop())) vm.stage += offset;
-//                print("object: " << object_to_string(peek(0)));
-//                print("is false:  " << isFalse(peek(0)));
                 break;
             }
             case PRINT: {
@@ -86,7 +113,11 @@ InterpretResult interpret() {
                     barley_exception("TypeMismatch", "excepted u_int64 in runtime", READ_LINE());
                     runtime_check();
                 }
-                vm.table.put(name, expression);
+                if (vm.constant) {
+                    vm.constant = false;
+                    vm.table.constant(name, expression);
+                }
+                else vm.table.put(name, expression);
                 break;
             }
             case DECLARE_U_INT_32: {
@@ -100,7 +131,11 @@ InterpretResult interpret() {
                     barley_exception("TypeMismatch", "excepted u_int32 in runtime", READ_LINE());
                     runtime_check();
                 }
-                vm.table.put(name, expression);
+                if (vm.constant) {
+                    vm.constant = false;
+                    vm.table.constant(name, expression);
+                }
+                else vm.table.put(name, expression);
                 break;
             }
             case DECLARE_U_SHRT_16: {
@@ -114,7 +149,11 @@ InterpretResult interpret() {
                     barley_exception("TypeMismatch", "excepted u_shrt16 in runtime", READ_LINE());
                     runtime_check();
                 }
-                vm.table.put(name, expression);
+                if (vm.constant) {
+                    vm.constant = false;
+                    vm.table.constant(name, expression);
+                }
+                else vm.table.put(name, expression);
                 break;
             }
             case DECLARE_U_BYTE_8: {
@@ -128,7 +167,11 @@ InterpretResult interpret() {
                     barley_exception("TypeMismatch", "excepted u_byte8 in runtime", READ_LINE());
                     runtime_check();
                 }
-                vm.table.put(name, expression);
+                if (vm.constant) {
+                    vm.constant = false;
+                    vm.table.constant(name, expression);
+                }
+                else vm.table.put(name, expression);
                 break;
             }
             case DECLARE_R_BYTE_8: {
@@ -142,7 +185,11 @@ InterpretResult interpret() {
                     barley_exception("TypeMismatch", "excepted r_byte8 in runtime", READ_LINE());
                     runtime_check();
                 }
-                vm.table.put(name, expression);
+                if (vm.constant) {
+                    vm.constant = false;
+                    vm.table.constant(name, expression);
+                }
+                else vm.table.put(name, expression);
                 break;
             }
             case DECLARE_R_BOOL_1: {
@@ -156,7 +203,11 @@ InterpretResult interpret() {
                     barley_exception("TypeMismatch", "excepted r_bool1 in runtime", READ_LINE());
                     runtime_check();
                 }
-                vm.table.put(name, expression);
+                if (vm.constant) {
+                    vm.constant = false;
+                    vm.table.constant(name, expression);
+                }
+                else vm.table.put(name, expression);
                 break;
             }
             case DECLARE_R_CHR_PTR: {
@@ -170,7 +221,11 @@ InterpretResult interpret() {
                     barley_exception("TypeMismatch", "excepted r_chr_ptr in runtime", READ_LINE());
                     runtime_check();
                 }
-                vm.table.put(name, expression);
+                if (vm.constant) {
+                    vm.constant = false;
+                    vm.table.constant(name, expression);
+                }
+                else vm.table.put(name, expression);
                 break;
             }
             case DECLARE_R_FLOAT_64: {
@@ -184,7 +239,11 @@ InterpretResult interpret() {
                     barley_exception("TypeMismatch", "excepted r_float64 in runtime", READ_LINE());
                     runtime_check();
                 }
-                vm.table.put(name, expression);
+                if (vm.constant) {
+                    vm.constant = false;
+                    vm.table.constant(name, expression);
+                }
+                else vm.table.put(name, expression);
                 break;
             }
             case DECLARE_R_INT_64: {
@@ -198,7 +257,11 @@ InterpretResult interpret() {
                     barley_exception("TypeMismatch", "excepted r_int64 in runtime", READ_LINE());
                     runtime_check();
                 }
-                vm.table.put(name, expression);
+                if (vm.constant) {
+                    vm.constant = false;
+                    vm.table.constant(name, expression);
+                }
+                else vm.table.put(name, expression);
                 break;
             }
             case DECLARE_R_INT_16: {
@@ -212,7 +275,11 @@ InterpretResult interpret() {
                     barley_exception("TypeMismatch", "excepted short in runtime", READ_LINE());
                     runtime_check();
                 }
-                vm.table.put(name, expression);
+                if (vm.constant) {
+                    vm.constant = false;
+                    vm.table.constant(name, expression);
+                }
+                else vm.table.put(name, expression);
                 break;
             }
             case DECLARE_R_INT_32: {
@@ -226,7 +293,11 @@ InterpretResult interpret() {
                     barley_exception("TypeMismatch", "excepted int in r_int32 declaration", READ_LINE());
                     runtime_check();
                 }
-                vm.table.put(name, expression);
+                if (vm.constant) {
+                    vm.constant = false;
+                    vm.table.constant(name, expression);
+                }
+                else vm.table.put(name, expression);
                 break;
             }
             case POP: pop(); break;

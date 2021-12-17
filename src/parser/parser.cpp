@@ -212,6 +212,9 @@ public:
             declare_u_int_64();
         } else if (match("IF")) {
             declare_if();
+        } else if (match("CONST")) {
+            emitByte(CONSTANTIFY);
+            declaration();
         } else {
             assignment();
         }
@@ -314,10 +317,11 @@ public:
 
     void assignment() {
         if (lookMatch(0, "ID") && lookMatch(1, "EQ")) {
-            identifierConstant(consume("ID", "").getText());
+            string name = consume("ID", "").getText();
             consume("EQ", "expected '=' after id in assignment");
             expression();
             emitByte(ASSIGN);
+            identifierConstant(name);
         } else {
             expressionStatement();
         }

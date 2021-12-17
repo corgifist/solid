@@ -77,6 +77,8 @@ int offsetize(Chunk *chunk, int offset) {
             return simpleOffset(offset, "SCOPE_START");
         case SCOPE_END:
             return simpleOffset(offset, "SCOPE_END");
+        case CONSTANTIFY:
+            return simpleOffset(offset, "CONSTANTIFY");
         default:
             return unknownOffset(chunk, offset);
     }

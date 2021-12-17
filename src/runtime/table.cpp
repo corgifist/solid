@@ -31,7 +31,28 @@ public:
     }
 
     void put(string name, Value value) {
+        Local newLocals[512];
+        for (int i = 0; i < 512; i++) {
+            if (locals[i].name == name) continue;
+            newLocals[i] = locals[i];
+        }
+        for (int i = 0; i < 512; i++) {
+            this->locals[i] = newLocals[i];
+        }
         Local local = genLocal(false, value, std::move(name));
+        this->locals[this->count++] = local;
+    }
+
+    void constant(string name, Value value) {
+        Local newLocals[512];
+        for (int i = 0; i < 512; i++) {
+            if (locals[i].name == name) continue;
+            newLocals[i] = locals[i];
+        }
+        for (int i = 0; i < 512; i++) {
+            this->locals[i] = newLocals[i];
+        }
+        Local local = genLocal(true, value, std::move(name));
         this->locals[this->count++] = local;
     }
 
@@ -62,13 +83,19 @@ public:
 
     bool contains(const string& name) {
        for (const Local& local : locals) {
-           if (local.name.empty()) break;
            if (local.name == name) {
                return true;
            }
        }
 
        return false;
+    }
+
+    bool isConstant(const string& name) {
+        for (const Local& local : locals) {
+            if (local.name == name && local.variable.isConstant) return true;
+        }
+        return false;
     }
 
     static Local genLocal(bool constant, Value value, string name) {

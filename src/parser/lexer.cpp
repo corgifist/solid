@@ -128,6 +128,7 @@ private:
         else if (acc == "u_int32") addToken("U_INT32", "u_int32");
         else if (acc == "u_int64") addToken("U_INT64", "u_int64");
         else if (acc == "and") addToken("AND", "and");
+        else if (acc == "const") addToken("CONST", "const");
         else addToken("ID", acc);
     }
 
