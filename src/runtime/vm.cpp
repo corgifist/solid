@@ -77,8 +77,14 @@ InterpretResult interpret() {
             }
             case CAST: {
                 Value expression = pop();
-                double operand = EXACT_OPERAND(expression);
                 const char* type = READ_STRING().c_str();
+                if (CONSUME_EXPR(expression, STRING)) {
+                    if (strcmp(type, "r_chr8") == 0) {
+                        push(CHAR(object_to_string(expression).at(0)));
+                    }
+                    break;
+                }
+                double operand = EXACT_OPERAND(expression);
                 if (strcmp(type, "r_shrt16") == 0) {
                     push(SHORT((short) operand));
                 } else if (strcmp(type, "r_int32") == 0) {
@@ -97,9 +103,29 @@ InterpretResult interpret() {
                     push(UNSIGNED_INT((unsigned int) operand));
                 } else if (strcmp(type, "u_int64") == 0) {
                     push(UNSIGNED_LONG((unsigned long) operand));
+                } else if (strcmp(type, "r_chr8") == 0) {
+                    push(CHAR((char) operand));
                 } else {
                     barley_exception("UndefinedType", snt("undefined type '") + snt(type) + snt("'"), READ_LINE());
                 }
+                break;
+            }
+            case DECLARE_R_CHR_8: {
+                Value expression = pop();
+                string name = READ_STRING();
+                if (vm.table.contains(name)) {
+                    barley_exception("DuplicateVariable", snt("variable '") + name + "' is already exists", READ_LINE());
+                    runtime_check();
+                }
+                if (!CONSUME_EXPR(expression, CHAR)) {
+                    barley_exception("TypeMismatch", "excepted u_int64 in runtime", READ_LINE());
+                    runtime_check();
+                }
+                if (vm.constant) {
+                    vm.constant = false;
+                    vm.table.constant(name, expression);
+                }
+                else vm.table.put(name, expression);
                 break;
             }
             case DECLARE_U_INT_64: {

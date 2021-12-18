@@ -12,7 +12,8 @@ typedef enum {
     CAST, ASSIGN, PRINT, DECLARE_R_FLOAT_64, DECLARE_R_CHR_PTR,
     DECLARE_R_BOOL_1, DECLARE_R_BYTE_8, SCOPE_START, SCOPE_END,
     DECLARE_U_BYTE_8, DECLARE_U_SHRT_16, DECLARE_U_INT_32,
-    DECLARE_U_INT_64, JUMP_IF_FALSE, JUMP_ANYWAY, CONSTANTIFY
+    DECLARE_U_INT_64, JUMP_IF_FALSE, JUMP_ANYWAY, CONSTANTIFY,
+    DECLARE_R_CHR_8
 } OpCode;
 
 #define SSTR(x) dynamic_cast< std::ostringstream & >( \
@@ -52,6 +53,7 @@ static ValueType stringToType(const string& source) {
     else if (strcmp(cstr, "u_shrt16") == 0) return UNSIGNED_SHORT;
     else if (strcmp(cstr, "u_int32") == 0) return UNSIGNED_INT;
     else if (strcmp(cstr, "u_int64") == 0) return UNSIGNED_LONG;
+    else if (strcmp(cstr, "r_chr8") == 0) return CHAR;
     return INT;
 }
 
@@ -83,6 +85,8 @@ static double EXACT_OPERAND(Value operand) {
             return (double) operand.as.unnt;
         case UNSIGNED_LONG:
             return (double) operand.as.unlgn;
+        case CHAR:
+            return (double) operand.as.byte;
     }
     return 0;
 }
@@ -140,6 +144,8 @@ static std::string object_to_string(Value value) {
         }
         case BOOL:
             return value.as.boolean ? "1" : "0";
+        case CHAR:
+            return SSTR(value.as.byte);
         default:
             return "NULL";
     }
@@ -198,6 +204,8 @@ static const char* type(Value operand) {
             return "u_int";
         case UNSIGNED_LONG:
             return "u_long";
+        case CHAR:
+            return "char";
     }
     return "NULL";
 }

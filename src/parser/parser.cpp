@@ -103,6 +103,8 @@ private:
                 return "u_int32";
             case UNSIGNED_LONG:
                 return "u_int64";
+            case CHAR:
+                return "r_chr8";
             default:
                 return "r_int32";
         }
@@ -145,6 +147,7 @@ public:
         typedefsPut("string", "r_chr_ptr");
         typedefsPut("bool", "r_bool1");
         typedefsPut("byte", "r_byte8");
+        typedefsPut("char", "r_chr8");
         typedefsPut("unsigned_byte", "u_byte8");
         typedefsPut("unsigned_short", "u_shrt16");
         typedefsPut("unsigned_int", "u_int32");
@@ -215,6 +218,8 @@ public:
         } else if (match("CONST")) {
             emitByte(CONSTANTIFY);
             declaration();
+        } else if (match("R_CHR8")) {
+            declare_r_chr_8();
         } else {
             assignment();
         }
@@ -236,6 +241,14 @@ public:
         if (match("ELSE")) statementOrBlock();
 
         patchJump(elseJump);
+    }
+
+    void declare_r_chr_8() {
+        string name = consume("ID", "expected identifier at r_chr8 declaration").getText();
+        consume("EQ", "expected '=' after identifier at r_chr8 declaration");
+        expression();
+        emitByte(DECLARE_R_CHR_8);
+        identifierConstant(name);
     }
 
     void declare_u_int_64() {
@@ -362,6 +375,9 @@ public:
             case UNSIGNED_LONG:
                 declare_u_int_64();
                 break;
+            case CHAR:
+                declare_r_chr_8();
+                break;
         }
     }
 
@@ -395,7 +411,24 @@ public:
     }
 
     void expression() {
+        or_();
+    }
+
+    void or_() {
         and_();
+
+        while (true) {
+            if (match("OR")) {
+                int elseJump = emitJump(JUMP_IF_FALSE);
+                int endJump = emitJump(JUMP_ANYWAY);
+
+                patchJump(elseJump);
+                expression();
+                patchJump(endJump);
+                continue;
+            }
+            break;
+        }
     }
 
     void and_() {

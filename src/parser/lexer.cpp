@@ -129,6 +129,8 @@ private:
         else if (acc == "u_int64") addToken("U_INT64", "u_int64");
         else if (acc == "and") addToken("AND", "and");
         else if (acc == "const") addToken("CONST", "const");
+        else if (acc == "r_chr8") addToken("R_CHR8", "r_chr8");
+        else if (acc == "or") addToken("OR", "or");
         else addToken("ID", acc);
     }
 
@@ -138,6 +140,10 @@ private:
         advance();
         while (peek(0) != '"') {
             char current = peek(0);
+            if (current == '\0') {
+                lex_error("reached eof while parsing string", line);
+                runtime_check();
+            }
             if (current == '\\') {
                 current = advance();
                 switch (current) {

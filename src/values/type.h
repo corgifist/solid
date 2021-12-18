@@ -8,7 +8,8 @@
 typedef enum {
     SHORT, INT, LONG, DOUBLE, STRING, BOOL, BYTE,
     // Unsigned types
-    UNSIGNED_BYTE, UNSIGNED_SHORT, UNSIGNED_INT, UNSIGNED_LONG
+    UNSIGNED_BYTE, UNSIGNED_SHORT, UNSIGNED_INT, UNSIGNED_LONG,
+    CHAR
 } ValueType;
 
 typedef struct {
@@ -37,6 +38,7 @@ typedef struct {
 #define LONG(value) ((Value) {LONG, {.lng = value}})
 #define DOUBLE(value) ((Value) {DOUBLE, {.dbl = value}})
 #define BOOL(value) ((Value) {BOOL, {.boolean = value}})
+#define CHAR(value) ((Value) {CHAR, {.byte = value}})
 
 //Unsigned types
 
