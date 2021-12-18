@@ -12,7 +12,6 @@
 #include<stdint-gcc.h>
 #include <cmath>
 #include<map>
-#include<tuple>
 
 #include "runtime.h"
 

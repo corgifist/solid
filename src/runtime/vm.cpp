@@ -54,11 +54,16 @@ InterpretResult interpret() {
                     runtime_check();
                 }
 
-                vm.table.put(name, expression);
+                vm.table.assign(name, expression);
                 break;
             }
             case CONSTANTIFY: {
                 vm.constant = true;
+                break;
+            }
+            case LOOP: {
+                uint32_t offset = READ_SHORT();
+                vm.stage -= offset;
                 break;
             }
             case JUMP_ANYWAY: {

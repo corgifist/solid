@@ -7,8 +7,6 @@
 #include "../chunk/chunk.h"
 #include "table.cpp"
 
-#define S_SIZE 2048
-
 typedef struct {
     uint8_t *stage;
     Chunk *chunk;
@@ -36,4 +34,3 @@ Value pop();
 Value peek(int relative);
 
 bool isFalse(Value value);
-

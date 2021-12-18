@@ -133,6 +133,20 @@ private:
         chunk.code[offset + 1] = jump & 0xff;
     }
 
+    void emitLoop(int loop) {
+        emitByte(LOOP);
+
+        int offset = chunk.count - loop + 2;
+        if (offset > 65333) {
+            barley_exception("JumpFailure", "too much code to jump over", line());
+            PARSER_RUNTIME_ERROR();
+            runtime_check();
+        }
+
+        emitByte((offset >> 8) & 0xff);
+        emitByte(offset & 0xff);
+    }
+
 public:
     explicit Parser(const vector<Token>& tokens) {
         this->tokens = tokens;
@@ -220,9 +234,25 @@ public:
             declaration();
         } else if (match("R_CHR8")) {
             declare_r_chr_8();
+        } else if (match("WHILE")) {
+            declare_while();
         } else {
             assignment();
         }
+    }
+
+    void declare_while() {
+        int loopStart = chunk.count;
+        consume("LPAREN", "expected '(' after while");
+        expression();
+        consume("RPAREN", "expected ')' after expression");
+
+        int exitJump = emitJump(JUMP_IF_FALSE);
+        statementOrBlock();
+
+        emitLoop(loopStart);
+
+        patchJump(exitJump);
     }
 
     void declare_if() {
@@ -446,30 +476,44 @@ public:
     }
 
     void condition() {
-        additive();
+        comparative();
 
         if (match("EQEQ")) {
-            additive();
+            comparative();
             emitBinary('=');
             return;
         }
 
         if (match("GTEQ")) {
-            additive();
+            comparative();
             emitBinary('g');
             return;
         }
 
         if (match("LTEQ")) {
-            additive();
+            comparative();
             emitBinary('l');
             return;
         }
 
         if (match("EXCLEQ")) {
-            additive();
-            emitByte('!');
+            comparative();
+            emitBinary('!');
             return;
+        }
+    }
+
+    void comparative() {
+        additive();
+
+        if (match("LT")) {
+            additive();
+            emitBinary('<');
+        }
+
+        if (match("GT")) {
+            additive();
+            emitBinary('>');
         }
     }
 

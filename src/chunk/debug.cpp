@@ -69,6 +69,8 @@ int offsetize(Chunk *chunk, int offset) {
             return jumpOffset(offset, 1, "JUMP_ANYWAY", chunk);
         case JUMP_IF_FALSE:
             return jumpOffset(offset, 1, "JUMP_IF_FALSE", chunk);
+        case LOOP:
+            return jumpOffset(offset, -1, "LOOP", chunk);
         case CAST:
             return constOffset(offset, "CAST", chunk);
         case ASSIGN:

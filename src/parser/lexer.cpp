@@ -3,6 +3,7 @@
 
 #include "lexer.h"
 #include "../utils.h"
+#include<stack>
 
 #define LEXER_RUNTIME_ERROR() runtime_result = RUNTIME_ERROR
 
@@ -131,6 +132,7 @@ private:
         else if (acc == "const") addToken("CONST", "const");
         else if (acc == "r_chr8") addToken("R_CHR8", "r_chr8");
         else if (acc == "or") addToken("OR", "or");
+        else if (acc == "while") addToken("WHILE", "while");
         else addToken("ID", acc);
     }
 

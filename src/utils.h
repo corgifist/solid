@@ -13,7 +13,7 @@ typedef enum {
     DECLARE_R_BOOL_1, DECLARE_R_BYTE_8, SCOPE_START, SCOPE_END,
     DECLARE_U_BYTE_8, DECLARE_U_SHRT_16, DECLARE_U_INT_32,
     DECLARE_U_INT_64, JUMP_IF_FALSE, JUMP_ANYWAY, CONSTANTIFY,
-    DECLARE_R_CHR_8
+    DECLARE_R_CHR_8, LOOP
 } OpCode;
 
 #define SSTR(x) dynamic_cast< std::ostringstream & >( \
