@@ -236,8 +236,39 @@ public:
             declare_r_chr_8();
         } else if (match("WHILE")) {
             declare_while();
+        } else if (match("FOR")) {
+            declare_for();
         } else {
             assignment();
+        }
+    }
+
+    void declare_for() {
+        consume("LPAREN", "expected '(' after 'for'");
+        declaration();
+
+        int loopStart = chunk.count;
+
+        consume("SEMICOLON", "expected ';' after init clause");
+        int exitJump = -1;
+        expression();
+        consume("SEMICOLON", "expected ';' after loop condition");
+        exitJump = emitJump(JUMP_IF_FALSE);
+
+        int bodyJump = emitJump(JUMP_ANYWAY);
+        int incrementStart = chunk.count;
+        declaration();
+        consume("RPAREN", "expected ')' after all clauses");
+
+        emitLoop(loopStart);
+        loopStart = incrementStart;
+        patchJump(bodyJump);
+
+        statementOrBlock();
+        emitLoop(loopStart);
+
+        if (exitJump != -1) {
+            patchJump(exitJump);
         }
     }
 
@@ -613,7 +644,7 @@ public:
         } else if (match("FALSE")) {
             emitConstant(BOOL(false));
         } else {
-            parse_exception("unknown expression", line());
+            parse_exception("unknown expression '" + current.asString() + "'", line());
             return;
         }
 

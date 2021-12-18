@@ -133,6 +133,7 @@ private:
         else if (acc == "r_chr8") addToken("R_CHR8", "r_chr8");
         else if (acc == "or") addToken("OR", "or");
         else if (acc == "while") addToken("WHILE", "while");
+        else if (acc == "for") addToken("FOR", "for");
         else addToken("ID", acc);
     }
 

@@ -4,7 +4,7 @@
 #pragma once
 
 #include "../utils.h"
-#include "constnants.h"
+#include "constants.h"
 #include <cstdlib>
 
 typedef struct {

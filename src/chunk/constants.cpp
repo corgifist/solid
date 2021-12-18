@@ -1,7 +1,7 @@
 // This script is part of SOLID language.
 // Copyright 2021.
 
-#include "constnants.h"
+#include "constants.h"
 #include "allocations.h"
 
 void initConstants(Constants *consts) {

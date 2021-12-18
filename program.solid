@@ -1,14 +1,3 @@
-
-if ("a" == "b") {
-    print "equals";
-} else {
-    print "not equals!";
+for (int i = 0; i < 10; i = i + 1) {
+    print "Hello, World!";
 };
-
-if ("a" != "b") {
-    print "not equals yay!";
-} else {
-    print "equals!";
-};
-
-print 5 == 5 and 1 == 1;
