@@ -244,6 +244,7 @@ public:
     }
 
     void declare_for() {
+        emitByte(SCOPE_START);
         consume("LPAREN", "expected '(' after 'for'");
         declaration();
 
@@ -266,7 +267,7 @@ public:
 
         statementOrBlock();
         emitLoop(loopStart);
-
+        emitByte(SCOPE_END);
         if (exitJump != -1) {
             patchJump(exitJump);
         }
@@ -603,13 +604,25 @@ public:
         } else if (match("ID")) {
             // Copy token's text
             string text = current.getText();
-            char* buffer = static_cast<char *>(malloc(sizeof(char) * text.length()));
-            for (int i = 0; i < text.length(); i++) {
-                buffer[i] = text.at(i);
-            }
-            buffer[text.length()] = '\0';
             emitByte(EXTRACT_BIND);
-            emitByte(addConstant(&chunk, STRING(buffer)));
+            identifierConstant(text);
+            if (match("INCR")) {
+                emitConstant(DOUBLE(1));
+                emitBinary('+');
+                emitByte(ASSIGN);
+                identifierConstant(text);
+                emitByte(EXTRACT_BIND);
+                identifierConstant(text);
+            }
+
+            if (match("DECR")) {
+                emitConstant(DOUBLE(1));
+                emitBinary('-');
+                emitByte(ASSIGN);
+                identifierConstant(text);
+                emitByte(EXTRACT_BIND);
+                identifierConstant(text);
+            }
             return;
         } else if (match("LPAREN")) {
             string maybeText = get(0).getText();

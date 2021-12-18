@@ -184,11 +184,11 @@ public:
             char current = peek(0);
             switch (current) {
                 case '+':
-                    addToken("PLUS", "+");
+                    addToken(match('+') ? "INCR" : "PLUS", "+");
                     NEXT();
                 case '-':
                     if (match('>')) addToken("STABBER", "->");
-                    else addToken("MINUS", "-");
+                    else addToken(match('-') ? "DECR" : "MINUS", "-");
                     NEXT();
                 case '*':
                     addToken("STAR", "*");

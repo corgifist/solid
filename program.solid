@@ -1,5 +1,3 @@
-typedef number -> float;
+int i = 12;
 
-number a = 1.2;
-
-print a;
+print i++ + -1;
