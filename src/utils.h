@@ -54,6 +54,9 @@ static ValueType stringToType(const string& source) {
     else if (strcmp(cstr, "u_int32") == 0) return UNSIGNED_INT;
     else if (strcmp(cstr, "u_int64") == 0) return UNSIGNED_LONG;
     else if (strcmp(cstr, "r_chr8") == 0) return CHAR;
+    else if (typedefs.contains(source)) {
+        return typedefs[source];
+    }
     return INT;
 }
 

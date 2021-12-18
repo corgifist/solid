@@ -48,7 +48,6 @@ private:
     string input;
     unsigned int length, pos, line;
     vector<Token> result;
-    std::map<string, ValueType> typedefs;
 
     Token token(TokenType type, string msg) const {
         return Token(type, line, msg);
