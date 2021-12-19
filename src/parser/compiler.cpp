@@ -11,15 +11,19 @@ void dump_tokens(vector<Token> tokens) {
 }
 
 void parse(const char* msg) {
-    Lexer lexer = Lexer(msg);
-    vector<Token> result = lexer.lex();
-    runtime_check();
-    dump_tokens(result);
-    Parser parser = Parser(result);
-    Chunk chunk = parser.parse();
-    runtime_check();
-    disassemble(&chunk, "compiler test");
-    initVM(&chunk);
-    interpret();
-    freeVM();
+    try {
+        Lexer lexer = Lexer(msg);
+        vector<Token> result = lexer.lex();
+        runtime_check();
+        dump_tokens(result);
+        Parser parser = Parser(result);
+        Chunk chunk = parser.parse();
+        runtime_check();
+        disassemble(&chunk, "compiler test");
+        initVM(&chunk);
+        interpret();
+        freeVM();
+    } catch (SolidException &ex) {
+        fprintf(stderr, "** (%s) %s at line %u\n", ex.getType().c_str(), ex.getText().c_str(), ex.getLine());
+    }
 }

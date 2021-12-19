@@ -19,9 +19,45 @@ using namespace std;
 
 #define print(S) cout << S << endl
 
+class SolidException {
+    std::string type, text;
+    unsigned int line;
+
+public:
+    SolidException(const std::string &type, const std::string &text, unsigned int line) {
+        this->type = type;
+        this->text = text;
+        this->line = line;
+    }
+
+    const string &getType() const {
+        return type;
+    }
+
+    void setType(const string &type) {
+        SolidException::type = type;
+    }
+
+    const string &getText() const {
+        return text;
+    }
+
+    void setText(const string &text) {
+        SolidException::text = text;
+    }
+
+    unsigned int getLine() const {
+        return line;
+    }
+
+    void setLine(unsigned int line) {
+        SolidException::line = line;
+    }
+};
+
 static void barley_exception(string type, string msg, int line) {
     runtime_result = RUNTIME_ERROR;
-    print("** (" << type << ") " << msg << " at line " << line);
+    throw SolidException(type, msg, line);
 }
 
 static void system_exception(string type, string msg) {

@@ -23,7 +23,7 @@ class Table {
 
 public:
     Table() {
-        this->depth = 1;
+        this->depth = 0;
         this->count = 0;
     }
 
@@ -90,6 +90,8 @@ public:
         this->depth--;
         for (int i = 0; i < 512; i++) {
             if (locals[i].name.empty()) continue;
+            print(locals[i].toString());
+            print("depth: " << this->depth);
             if (locals[i].depth > this->depth) {
                 this->count--;
                 continue;

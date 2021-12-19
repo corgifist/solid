@@ -15,7 +15,7 @@ class Parser {
 private:
     vector<Token> tokens;
     unsigned int pos, size;
-    Chunk chunk;
+    Chunk chunk{};
     Token EOF_TOKEN = Token("EOF", 1, "\0");
 
     Token get(int rel) const {
