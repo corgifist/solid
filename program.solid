@@ -1,39 +1,7 @@
-switch (0) {
-    case 0: {
-        print "got 0";
-    }
+auto name = "jane";
 
-    case 1: {
-        print "got 1";
-    }
+print name;
 
-    default: {
-        print "got default";
-    }
-};
-switch (1) {
-    case 0: {
-        print "got 0";
-    }
+name = "lol";
 
-    case 1: {
-        print "got 1";
-    }
-
-    default: {
-        print "got default";
-    }
-};
-switch (2) {
-    case 0: {
-        print "got 0";
-    }
-
-    case 1: {
-        print "got 1";
-    }
-
-    default: {
-        print "got default";
-    }
-};
+print name;

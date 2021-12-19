@@ -246,6 +246,8 @@ public:
             declare_for();
         } else if (match("SWITCH")) {
             declare_switch();
+        } else if (match("AUTO")) {
+            declare_auto();
         } else {
             expressionStatement();
         }
@@ -350,6 +352,14 @@ public:
         if (match("ELSE")) statementOrBlock();
 
         patchJump(elseJump);
+    }
+
+    void declare_auto() {
+        string name = consume("ID", "expected identifier at 'auto' declaration").getText();
+        consume("EQ", "expected '=' after identifier at 'auto' declaration");
+        expression();
+        emitByte(DECLARE_AUTO);
+        identifierConstant(name);
     }
 
     void declare_r_chr_8() {

@@ -92,6 +92,7 @@ InterpretResult interpret() {
             }
             case ASSIGN: {
                 Value expression = pop();
+                push(expression);
                 string name = READ_STRING();
                 if (!vm.table.contains(name)) {
                     barley_exception("UndefinedVariable", snt("undefined variable '") + name + "' to assign", READ_LINE());
@@ -171,6 +172,20 @@ InterpretResult interpret() {
                 } else {
                     barley_exception("UndefinedType", snt("undefined type '") + snt(type) + snt("'"), READ_LINE());
                 }
+                break;
+            }
+            case DECLARE_AUTO: {
+                Value expression = pop();
+                string name = READ_STRING();
+                if (vm.table.contains(name)) {
+                    barley_exception("DuplicateVariable", snt("variable '") + name + "' is already exists", READ_LINE());
+                    runtime_check();
+                }
+                if (vm.constant) {
+                    vm.constant = false;
+                    vm.table.constant(name, expression);
+                }
+                else vm.table.put(name, expression);
                 break;
             }
             case DECLARE_R_CHR_8: {

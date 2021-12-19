@@ -35,6 +35,8 @@ int offsetize(Chunk *chunk, int offset) {
             return simpleOffset(offset, "BEGIN_SWITCH");
         case BUILD_SWITCH:
             return buildSwitchOffset(offset, "BUILD_SWITCH", chunk);
+        case DECLARE_AUTO:
+            return constOffset(offset, "DECLARE_AUTO", chunk);
         case DECLARE_R_INT_16:
             return constOffset(offset, "DECLARE_R_INT_16", chunk);
         case DECLARE_R_INT_32:
@@ -147,6 +149,7 @@ int switchTableOffset(int offset, const char* name) {
     for (int i = 0; i < table.size(); i++) {
         print(" - "<< i << " | " << table.at(i));
     }
+    table.clear();
     return offset + 1;
 }
 

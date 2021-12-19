@@ -136,6 +136,7 @@ private:
         else if (acc == "switch") addToken("SWITCH", "switch");
         else if (acc == "case") addToken("CASE", "case");
         else if (acc == "default") addToken("DEFAULT", "default");
+        else if (acc == "auto") addToken("AUTO", "auto");
         else addToken("ID", acc);
     }
 
