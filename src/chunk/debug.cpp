@@ -12,6 +12,8 @@ void disassemble(Chunk *chunk, const char *name) {
     }
 }
 
+vector<int> table;
+
 int offsetize(Chunk *chunk, int offset) {
     int line = getLine(chunk, offset);
     if (offset != 0) {
@@ -27,6 +29,12 @@ int offsetize(Chunk *chunk, int offset) {
     uint8_t instruction = chunk->code[offset];
     printf("%04d ", offset);
     switch (instruction) {
+        case SWITCH_TABLE:
+            return switchTableOffset(offset, "SWITCH_TABLE");
+        case BEGIN_SWITCH:
+            return simpleOffset(offset, "BEGIN_SWITCH");
+        case BUILD_SWITCH:
+            return buildSwitchOffset(offset, "BUILD_SWITCH", chunk);
         case DECLARE_R_INT_16:
             return constOffset(offset, "DECLARE_R_INT_16", chunk);
         case DECLARE_R_INT_32:
@@ -66,11 +74,11 @@ int offsetize(Chunk *chunk, int offset) {
         case POP:
             return simpleOffset(offset, "POP");
         case JUMP_ANYWAY:
-            return jumpOffset(offset, 1, "JUMP_ANYWAY", chunk);
+            return constOffset(offset, "JUMP_ANYWAY", chunk);
         case JUMP_IF_FALSE:
-            return jumpOffset(offset, 1, "JUMP_IF_FALSE", chunk);
+            return constOffset(offset, "JUMP_IF_FALSE", chunk);
         case LOOP:
-            return jumpOffset(offset, -1, "LOOP", chunk);
+            return constOffset(offset, "LOOP", chunk);
         case CAST:
             return constOffset(offset, "CAST", chunk);
         case ASSIGN:
@@ -83,13 +91,15 @@ int offsetize(Chunk *chunk, int offset) {
             return simpleOffset(offset, "SCOPE_END");
         case CONSTANTIFY:
             return simpleOffset(offset, "CONSTANTIFY");
+        case DUP:
+            return simpleOffset(offset, "DUP");
         default:
             return unknownOffset(chunk, offset);
     }
 }
 
 int jumpOffset(int offset, int sign, const char *string, Chunk *chunk) {
-    uint16_t jump = (uint16_t)(chunk->code[offset + 1] << 8);
+    auto jump = (uint16_t)(chunk->code[offset + 1] << 8);
     jump |= chunk->code[offset + 2];
     print(string << " " << offset << " >> " << offset + 3 + sign * jump);
     return offset + 3;
@@ -111,6 +121,13 @@ int constOffset(int offset, const char *name, Chunk *chunk) {
     return offset + 2;
 }
 
+int buildSwitchOffset(int offset, const char *name, Chunk *chunk) {
+    Value constant = chunk->constants.values[chunk->code[offset + 1]];
+    print(name << " " << size(constant) << " " << " *" << &offset << " '" << object_to_string(constant) << "'");
+    table.push_back(EXACT_OPERAND(chunk->constants.values[chunk->code[offset + 1]]));
+    return offset + 2;
+}
+
 int longConstOffset(int offset, const char*name, Chunk* chunk) {
     uint32_t index = chunk->code[offset + 1] |
                                              (chunk->code[offset + 2] << 8) |
@@ -123,5 +140,13 @@ int longConstOffset(int offset, const char*name, Chunk* chunk) {
 int operatorOffset(int offset, const char *name, Chunk *chunk) {
     print(name << " '" << chunk->code[offset + 1] << "'");
     return offset + 2;
+}
+
+int switchTableOffset(int offset, const char* name) {
+    print(name);
+    for (int i = 0; i < table.size(); i++) {
+        print(" - "<< i << " | " << table.at(i));
+    }
+    return offset + 1;
 }
 

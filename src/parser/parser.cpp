@@ -10,7 +10,6 @@
 
 #define PARSER_RUNTIME_ERROR() runtime_result = RUNTIME_ERROR
 
-
 class Parser {
 private:
     vector<Token> tokens;
@@ -116,8 +115,8 @@ private:
 
     int emitJump(uint8_t instruction) {
         emitByte(instruction);
-        emitBytes(0xff, 0xff);
-        return chunk.count - 2;
+        emitByte(0xff);
+        return chunk.count - 1;
     }
 
     void patchJump(int offset) {
@@ -129,8 +128,7 @@ private:
             runtime_check();
         }
 
-        chunk.code[offset] = (jump >> 8) & 0xff;
-        chunk.code[offset + 1] = jump & 0xff;
+        chunk.code[offset] = addConstant(&chunk, UNSIGNED_SHORT(static_cast<unsigned short>(chunk.count)));
     }
 
     void emitLoop(int loop) {
@@ -143,8 +141,16 @@ private:
             runtime_check();
         }
 
-        emitByte((offset >> 8) & 0xff);
-        emitByte(offset & 0xff);
+        emitByte(addConstant(&chunk, UNSIGNED_SHORT(static_cast<unsigned short>(loop))));
+    }
+
+    int emitSwitch() {
+        emitBytes(BUILD_SWITCH, addConstant(&chunk, UNSIGNED_SHORT(0xff)));
+        return chunk.count - 1;
+    }
+
+    void patchSwitch(int swps) {
+        chunk.constants.values[chunk.code[swps]] = UNSIGNED_SHORT(static_cast<unsigned short>(swps + 3));
     }
 
 public:
@@ -238,13 +244,55 @@ public:
             declare_while();
         } else if (match("FOR")) {
             declare_for();
+        } else if (match("SWITCH")) {
+            declare_switch();
         } else {
-            assignment();
+            expressionStatement();
         }
+    }
+    void declare_switch() {
+        consume("LPAREN", "Expect '(' after 'switch'.");
+        expression();
+        consume("RPAREN", "Expect ')' after value.");
+        consume("LBRACE", "Expect '{' before switch cases.");
+
+        int caseEnds[256];
+        int caseCount = 0;
+
+        emitByte(BEGIN_SWITCH);
+
+        while (!match("RBRACE")) {
+            if (match("CASE")) {
+                expression();
+                int swps = emitSwitch();
+                int skipJump = emitJump(JUMP_ANYWAY);
+                patchSwitch(swps);
+                consume("COLON", "expected ':' after expression");
+                statementOrBlock();
+                caseEnds[caseCount++] = emitJump(JUMP_ANYWAY);
+                patchJump(skipJump);
+            } else {
+                consume("DEFAULT", "because 'switch' is not found, you must declare 'default' clause");
+                emitConstant(STRING("DEFAULT_CLAUSE"));
+                int swps = emitSwitch();
+                int skipJump = emitJump(JUMP_ANYWAY);
+                patchSwitch(swps);
+                consume("COLON", "expected ':' after 'default'");
+                statementOrBlock();
+                caseEnds[caseCount++] = emitJump(JUMP_ANYWAY);
+                patchJump(skipJump);
+            }
+        }
+
+        emitByte(SWITCH_TABLE);
+
+        for (int i = 0; i < caseCount; i++) {
+            patchJump(caseEnds[i]);
+        }
+
     }
 
     void declare_for() {
-        emitByte(SCOPE_START);
         consume("LPAREN", "expected '(' after 'for'");
         declaration();
 
@@ -267,7 +315,6 @@ public:
 
         statementOrBlock();
         emitLoop(loopStart);
-        emitByte(SCOPE_END);
         if (exitJump != -1) {
             patchJump(exitJump);
         }
@@ -390,18 +437,6 @@ public:
         emitByte(PRINT);
     }
 
-    void assignment() {
-        if (lookMatch(0, "ID") && lookMatch(1, "EQ")) {
-            string name = consume("ID", "").getText();
-            consume("EQ", "expected '=' after id in assignment");
-            expression();
-            emitByte(ASSIGN);
-            identifierConstant(name);
-        } else {
-            expressionStatement();
-        }
-    }
-
     void declare_by_type(ValueType type) {
         switch (type) {
             case SHORT:
@@ -473,7 +508,19 @@ public:
     }
 
     void expression() {
-        or_();
+        assignment();
+    }
+
+    void assignment() {
+        if (lookMatch(0, "ID") && lookMatch(1, "EQ")) {
+            string name = consume("ID", "").getText();
+            consume("EQ", "expected '=' after id in assignment");
+            or_();
+            emitByte(ASSIGN);
+            identifierConstant(name);
+        } else {
+            or_();
+        }
     }
 
     void or_() {

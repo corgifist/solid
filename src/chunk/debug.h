@@ -16,6 +16,12 @@ int unknownOffset(Chunk* chunk, int offset);
 
 int constOffset(int offset, const char *name, Chunk *chunk);
 
+int buildSwitchOffset(int offset, const char* name, Chunk* chunk);
+
 int longConstOffset(int offset, const char* name, Chunk* chunk);
 
 int operatorOffset(int offset, const char *name, Chunk *chunk);
+
+int switchOffset(int offset, const char* name, Chunk* chunk);
+
+int switchTableOffset(int offset, const char *name);

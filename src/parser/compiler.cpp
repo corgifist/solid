@@ -27,3 +27,4 @@ void parse(const char* msg) {
         fprintf(stderr, "** (%s) %s at line %u\n", ex.getType().c_str(), ex.getText().c_str(), ex.getLine());
     }
 }
+

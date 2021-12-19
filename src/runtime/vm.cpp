@@ -4,10 +4,10 @@
 #include "vm.h"
 #include "table.h"
 
-#define READ_BYTE() (*vm.stage++)
+#define READ_BYTE() (vm.chunk->code[vm.stage++])
 #define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE()])
 #define READ_STRING() object_to_string(READ_CONSTANT())
-#define READ_LINE() (getLine(vm.chunk, (int) *vm.stage))
+#define READ_LINE() (getLine(vm.chunk, vm.stage))
 #define READ_SHORT() (vm.stage += 2, (uint16_t)((vm.stage[-2] << 8) | vm.stage[-1]))
 #define RUNTIME_ERROR() runtime_result = RUNTIME_ERROR
 #define RUNTIME_OK() runtime_result = RUNTIME_OK
@@ -18,8 +18,9 @@ VM vm;
 
 void initVM(Chunk *chunk) {
     vm.chunk = chunk;
-    vm.stage = vm.chunk->code;
+    vm.stage = 0;
     vm.table = Table();
+    vm.switchStack = *(new stack<unordered_map<string, int>>);
     resetStack();
 }
 
@@ -28,10 +29,67 @@ void freeVM() {
     initVM(vm.chunk);
 }
 
+void traceVM() {
+    printf("[");
+    for (int i = 0; i < vm.stackCount; i++) {
+        printf("%s, ", object_to_string(vm.stack[vm.stackCount]).c_str());
+    }
+    printf("]\n");
+}
+
+void newSwitch() {
+    unordered_map<string, int> newMap;
+    vm.switchStack.push(newMap);
+}
+
+void pushSwitch(const Value value, int jump) {
+    unordered_map<string, int> acc = vm.switchStack.top();
+    vm.switchStack.pop();
+    acc[object_to_string(value)] = jump;
+    vm.switchStack.push(acc);
+}
+
+unordered_map<string, int> popSwitch() {
+    unordered_map<string, int> result = vm.switchStack.top();
+    vm.switchStack.pop();
+    return result;
+}
+
 InterpretResult interpret() {
     for (;;) {
         runtime_check();
         switch (READ_BYTE()) {
+            case BEGIN_SWITCH: {
+                newSwitch();
+                break;
+            }
+            case BUILD_SWITCH: {
+                Value expr = pop();
+                int jump = EXACT_OPERAND(READ_CONSTANT());
+                pushSwitch(expr, jump);
+                break;
+            }
+            case SWITCH_TABLE: {
+                Value source = pop();
+                unordered_map<string , int> clauses = popSwitch();
+                bool ok = false;
+                for (const auto&[key, value] : clauses) {
+                    if (key == object_to_string(source)) {
+                        vm.stage = value;
+                        ok = true;
+                        continue;
+                    }
+                }
+                if (!ok) {
+                    for (const auto& [key, value] : clauses) {
+                        if (key == "DEFAULT_CLAUSE") {
+                            vm.stage = value;
+                            break;
+                        }
+                    }
+                }
+                break;
+            }
             case ASSIGN: {
                 Value expression = pop();
                 string name = READ_STRING();
@@ -62,17 +120,17 @@ InterpretResult interpret() {
                 break;
             }
             case LOOP: {
-                uint32_t offset = READ_SHORT();
-                vm.stage -= offset;
+                uint32_t offset = EXACT_OPERAND(READ_CONSTANT());
+                vm.stage = offset;
                 break;
             }
             case JUMP_ANYWAY: {
-                uint16_t offset = READ_SHORT();
-                vm.stage += offset;
+                uint16_t offset = EXACT_OPERAND(READ_CONSTANT());
+                vm.stage = offset;
                 break;
             }
             case JUMP_IF_FALSE: {
-                uint16_t offset = READ_SHORT();
+                uint16_t offset = EXACT_OPERAND(READ_CONSTANT());
                 if (isFalse(pop())) vm.stage += offset;
                 break;
             }
@@ -331,6 +389,7 @@ InterpretResult interpret() {
                 else vm.table.put(name, expression);
                 break;
             }
+            case DUP: push(peek(0)); break;
             case POP: pop(); break;
             case SCOPE_START: vm.table.push(); break;
             case SCOPE_END: vm.table.pop(); break;
@@ -448,7 +507,6 @@ void push(Value value) {
         vm.stackCapacity = GROW_CAPACITY(oldCapacity);
         vm.stack = GROW_ARRAY(Value, vm.stack, vm.stackCount, vm.stackCapacity);
     }
-
     vm.stack[vm.stackCount] = value;
     vm.stackCount++;
 }
@@ -463,9 +521,9 @@ Value pop() {
 }
 
 Value peek(int relative) {
-    return vm.stack[vm.stackCount + relative];
+    return vm.stack[vm.stackCount - relative];
 }
 
 bool isFalse(Value value) {
-    return object_to_string(value) == "0";
+    return value.as.boolean == false;
 }

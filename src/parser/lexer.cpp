@@ -133,6 +133,9 @@ private:
         else if (acc == "or") addToken("OR", "or");
         else if (acc == "while") addToken("WHILE", "while");
         else if (acc == "for") addToken("FOR", "for");
+        else if (acc == "switch") addToken("SWITCH", "switch");
+        else if (acc == "case") addToken("CASE", "case");
+        else if (acc == "default") addToken("DEFAULT", "default");
         else addToken("ID", acc);
     }
 
@@ -226,7 +229,9 @@ public:
                 case '!':
                     addToken(match('=') ? "EXCLEQ" : "EXCL", "!");
                     NEXT();
-
+                case ':':
+                    addToken("COLON", ":");
+                    NEXT();
                 SKIP_WHITESPACES();
 
                 default: // checks

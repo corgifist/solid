@@ -28,8 +28,11 @@ typedef struct {
         unsigned int unnt;
         unsigned long unlgn;
     } as;
-} Value;
 
+    bool operator<(const auto other) const {
+        return false;
+    }
+} Value;
 
 #define STRING(value) ((Value) {STRING, {.string = value}})
 #define BYTE(value) ((Value) {BYTE, {.byte = value}})
