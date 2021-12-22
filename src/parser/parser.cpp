@@ -17,6 +17,8 @@ private:
     Chunk chunk{};
     Token EOF_TOKEN = Token("EOF", 1, "\0");
     string function;
+    vector<int> innermosts;
+    vector<int> innerbreaks;
 
     Token get(int rel) const {
         int final = pos + rel;
@@ -258,9 +260,23 @@ public:
             declare_auto();
         } else if (match("VOID")) {
             declare_void();
+        } else if (match("BREAK")) {
+            emit_break();
+        } else if (match("CONTINUE")) {
+
         } else {
             expressionStatement();
         }
+    }
+
+    void emit_break() {
+        if (innermosts.empty()) {
+            parse_exception("can't use 'break' outside loop", line());
+            runtime_check();
+        }
+        emitByte(JUMP_ANYWAY);
+        emitByte(0xff);
+        innerbreaks.push_back(chunk.count - 1);
     }
 
     void declare_void() {
@@ -336,7 +352,7 @@ public:
         declaration();
 
         int loopStart = chunk.count;
-
+        innermosts.push_back(loopStart);
         consume("SEMICOLON", "expected ';' after init clause");
         int exitJump = -1;
         expression();
@@ -361,15 +377,22 @@ public:
 
     void declare_while() {
         int loopStart = chunk.count;
+        innermosts.push_back(loopStart);
         consume("LPAREN", "expected '(' after while");
         expression();
         consume("RPAREN", "expected ')' after expression");
-
         int exitJump = emitJump(JUMP_IF_FALSE);
         statementOrBlock();
-
         emitLoop(loopStart);
-
+        if (!innerbreaks.empty()) {
+            int last = -1;
+            for (int stamp : innerbreaks) {
+                if (stamp == last) break;
+                last = stamp;
+                innerbreaks.pop_back();
+                chunk.code[stamp] = addConstant(&chunk, UNSIGNED_SHORT((unsigned short) chunk.count));
+            }
+        }
         patchJump(exitJump);
     }
 

@@ -138,6 +138,8 @@ private:
         else if (acc == "default") addToken("DEFAULT", "default");
         else if (acc == "auto") addToken("AUTO", "auto");
         else if (acc == "void") addToken("VOID", "void");
+        else if (acc == "break") addToken("BREAK", "break");
+        else if (acc == "continue") addToken("CONTINUE", "continue");
         else addToken("ID", acc);
     }
 

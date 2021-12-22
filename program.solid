@@ -1,1 +1,6 @@
-print 2 + 2 * 2;
+int i = 0;
+
+while (i++ < 10) {
+    if (i > 5 or i == 5) { print "i"; break; };
+    print i;
+};
