@@ -3,13 +3,14 @@
 
 #pragma once
 
-#include "../chunk/allocations.h"
+#ifndef solid_type_h
+#define solid_type_h
 
 typedef enum {
     SHORT, INT, LONG, DOUBLE, STRING, BOOL, BYTE,
     // Unsigned types
     UNSIGNED_BYTE, UNSIGNED_SHORT, UNSIGNED_INT, UNSIGNED_LONG,
-    CHAR
+    CHAR, STRANGE
 } ValueType;
 
 typedef struct {
@@ -27,11 +28,9 @@ typedef struct {
         unsigned short unshr;
         unsigned int unnt;
         unsigned long unlgn;
-    } as;
 
-    bool operator<(const auto other) const {
-        return false;
-    }
+        void* strange; // strange types, that can't be referenced by using it's type
+    } as;
 } Value;
 
 #define STRING(value) ((Value) {STRING, {.string = value}})
@@ -42,6 +41,7 @@ typedef struct {
 #define DOUBLE(value) ((Value) {DOUBLE, {.dbl = value}})
 #define BOOL(value) ((Value) {BOOL, {.boolean = value}})
 #define CHAR(value) ((Value) {CHAR, {.byte = value}})
+#define STRANGE(value) ((Value) {STRANGE, {.strange = value}})
 
 //Unsigned types
 
@@ -53,3 +53,4 @@ typedef struct {
 
 #define IS_NUMBER_SUBSET(value) (value.type == SHORT || value.type == INT || value.type == LONG || value.type == DOUBLE || value.type == BYTE) || \
     (value.type == UNSIGNED_BYTE || value.type == UNSIGNED_SHORT || value.type == UNSIGNED_INT || value.type == UNSIGNED_LONG)
+#endif

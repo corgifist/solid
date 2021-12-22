@@ -3,6 +3,9 @@
 
 #pragma once
 
+#ifndef solid_constants_h
+#define solid_constants_h
+
 #include "../values/type.h"
 
 typedef struct {
@@ -15,3 +18,5 @@ void initConstants(Constants *consts);
 void writeConstants(Constants *consts, Value value);
 
 void freeConstants(Constants *consts);
+
+#endif

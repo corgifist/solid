@@ -9,16 +9,16 @@
 #include "../chunk/chunk.h"
 #include "table.cpp"
 
-typedef struct {
-    std::map<Value, int> clauses;
-} Switcher;
+#define FRAMES_MAX 128
 
 typedef struct {
     int stage;
-    Chunk *chunk;
-    Value* stack;
-    int stackCount;
-    int stackCapacity;
+    Chunk* function;
+    stack<Value> st;
+} CallFrame;
+
+typedef struct {
+    stack<CallFrame> frames;
     Table table;
     bool constant;
     std::stack<std::unordered_map<string, int>> switchStack;
@@ -29,6 +29,8 @@ void initVM(Chunk *chunk);
 void freeVM();
 
 void traceVM();
+
+void frameVM(CallFrame frame);
 
 void newSwitch();
 

@@ -3,36 +3,31 @@
 
 #include "vm.h"
 #include "table.h"
-
-#define READ_BYTE() (vm.chunk->code[vm.stage++])
-#define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE()])
-#define READ_STRING() object_to_string(READ_CONSTANT())
-#define READ_LINE() (getLine(vm.chunk, vm.stage))
-#define READ_SHORT() (vm.stage += 2, (uint16_t)((vm.stage[-2] << 8) | vm.stage[-1]))
-#define RUNTIME_ERROR() runtime_result = RUNTIME_ERROR
-#define RUNTIME_OK() runtime_result = RUNTIME_OK
-#define CONSUME_EXPR(value, type_) (value.type == type_)
-#define snt(strin) string(strin)
+#include "../chunk/allocations.h"
 
 VM vm;
 
 void initVM(Chunk *chunk) {
-    vm.chunk = chunk;
-    vm.stage = 0;
+    CallFrame frame;
+    frame.function = chunk;
+    frame.stage = 0;
+    vm.frames.push(frame);
     vm.table = Table();
-    vm.switchStack = *(new stack<unordered_map<string, int>>);
     resetStack();
 }
 
 void freeVM() {
-    freeChunk(vm.chunk);
-    initVM(vm.chunk);
+    for (int i = 0; i < vm.frames.size(); i++) {
+        freeChunk(vm.frames.top().function);
+        vm.frames.pop();
+    };
 }
 
 void traceVM() {
     printf("[");
-    for (int i = 0; i < vm.stackCount; i++) {
-        printf("%s, ", object_to_string(vm.stack[vm.stackCount]).c_str());
+    for (int i = 0; i < vm.frames.size(); i++) {
+        printf("%s, ", object_to_string(vm.frames.top().st.top()).c_str());
+        vm.frames.top().st.pop();
     }
     printf("]\n");
 }
@@ -56,9 +51,26 @@ unordered_map<string, int> popSwitch() {
 }
 
 InterpretResult interpret() {
+
+#define READ_BYTE() (frame.function->code[frame.stage++])
+#define READ_CONSTANT() (frame.function->constants.values[READ_BYTE()])
+#define READ_STRING() object_to_string(READ_CONSTANT())
+#define READ_LINE() (getLine(frame.function, frame.stage))
+#define RUNTIME_ERROR() runtime_result = RUNTIME_ERROR
+#define RUNTIME_OK() runtime_result = RUNTIME_OK
+#define CONSUME_EXPR(value, type_) (value.type == type_)
+#define snt(strin) string(strin)
+
+    CallFrame frame = vm.frames.top();
+
     for (;;) {
         runtime_check();
         switch (READ_BYTE()) {
+            case DECLARE_FUNCTION: {
+                ObjFunction* function = (ObjFunction*) pop().as.strange;
+                print("successs");
+                break;
+            }
             case BEGIN_SWITCH: {
                 newSwitch();
                 break;
@@ -75,7 +87,7 @@ InterpretResult interpret() {
                 bool ok = false;
                 for (const auto&[key, value] : clauses) {
                     if (key == object_to_string(source)) {
-                        vm.stage = value;
+                        frame.stage = value;
                         ok = true;
                         continue;
                     }
@@ -83,7 +95,7 @@ InterpretResult interpret() {
                 if (!ok) {
                     for (const auto& [key, value] : clauses) {
                         if (key == "DEFAULT_CLAUSE") {
-                            vm.stage = value;
+                            frame.stage = value;
                             break;
                         }
                     }
@@ -122,17 +134,17 @@ InterpretResult interpret() {
             }
             case LOOP: {
                 uint32_t offset = EXACT_OPERAND(READ_CONSTANT());
-                vm.stage = offset;
+                frame.stage = offset;
                 break;
             }
             case JUMP_ANYWAY: {
                 uint16_t offset = EXACT_OPERAND(READ_CONSTANT());
-                vm.stage = offset;
+                frame.stage = offset;
                 break;
             }
             case JUMP_IF_FALSE: {
                 uint16_t offset = EXACT_OPERAND(READ_CONSTANT());
-                if (isFalse(pop())) vm.stage += offset;
+                if (isFalse(pop())) frame.stage = offset;
                 break;
             }
             case PRINT: {
@@ -409,10 +421,10 @@ InterpretResult interpret() {
             case SCOPE_START: vm.table.push(); break;
             case SCOPE_END: vm.table.pop(); break;
             case LONG_CONSTANT: {
-                uint32_t index = vm.chunk->code[READ_BYTE()] |
-                                 (vm.chunk->code[READ_BYTE()] << 8) |
-                                 (vm.chunk->code[READ_BYTE()] << 16);
-                Value constant = vm.chunk->constants.values[index];
+                uint32_t index = READ_BYTE() |
+                                 READ_BYTE() << 8 |
+                                 READ_BYTE() << 16;
+                Value constant = frame.function->constants.values[index];
                 push(constant);
                 break;
             }
@@ -513,32 +525,25 @@ void concat(Value a, Value b) {
 }
 
 void resetStack() {
-    vm.stackCount = 0;
+    for (int i = 0; i < vm.frames.top().st.size(); i++) {
+        vm.frames.top().st.pop();
+    }
 }
 
 void push(Value value) {
-    if (vm.stackCapacity < vm.stackCount + 1) {
-        int oldCapacity = vm.stackCapacity;
-        vm.stackCapacity = GROW_CAPACITY(oldCapacity);
-        vm.stack = GROW_ARRAY(Value, vm.stack, vm.stackCount, vm.stackCapacity);
-    }
-    vm.stack[vm.stackCount] = value;
-    vm.stackCount++;
+    vm.frames.top().st.push(value);
 }
 
 Value pop() {
-    if (vm.stackCount == 0) {
-        barley_exception("StackEmpty", "stack is empty", READ_LINE());
-        runtime_check();
-    }
-    vm.stackCount--;
-    return vm.stack[vm.stackCount];
+    Value result = vm.frames.top().st.top();
+    vm.frames.top().st.pop();
+    return result;
 }
 
 Value peek(int relative) {
-    return vm.stack[vm.stackCount - relative];
+    return vm.frames.top().st.top();
 }
 
 bool isFalse(Value value) {
-    return value.as.boolean == false;
+    return !value.as.boolean;
 }

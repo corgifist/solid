@@ -2,6 +2,7 @@
 // Copyright 2021.
 
 #include "debug.h"
+#include "../utils.h"
 
 int jumpOffset(int offset, int sign, const char *string, Chunk *chunk);
 
@@ -29,6 +30,8 @@ int offsetize(Chunk *chunk, int offset) {
     uint8_t instruction = chunk->code[offset];
     printf("%04d ", offset);
     switch (instruction) {
+        case DECLARE_FUNCTION:
+            return constOffset(offset, "DECLARE_FUNCTION", chunk);
         case SWITCH_TABLE:
             return switchTableOffset(offset, "SWITCH_TABLE");
         case BEGIN_SWITCH:
@@ -66,7 +69,7 @@ int offsetize(Chunk *chunk, int offset) {
         case CONSTANT:
             return constOffset(offset, "CONSTANT", chunk);
         case LONG_CONSTANT:
-            return longConstOffset(offset, "LONG_CONSTANT", chunk);
+            return longConstOffset(offset, "XCONSTANT", chunk);
         case EXTRACT_BIND:
             return constOffset(offset, "EXTRACT_BIND", chunk);
         case UNARY:

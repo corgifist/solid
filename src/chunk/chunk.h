@@ -3,9 +3,10 @@
 
 #pragma once
 
-#include "../utils.h"
 #include "constants.h"
 #include <cstdlib>
+#include <string>
+#include <vector>
 
 typedef struct {
     int offset;
@@ -14,12 +15,24 @@ typedef struct {
 
 typedef struct {
     int count, capacity;
-    uint8_t *code;
+    u_int8_t *code;
     Constants constants;
     int lineCount;
     int lineCapacity;
     LineStart* lines;
 } Chunk;
+
+typedef struct {
+    int arity;
+    std::vector<ValueType> types;
+    std::vector<std::string> names;
+    Chunk chunk;
+} Clause;
+
+typedef struct {
+    std::vector<Clause> clauses;
+    std::string name;
+} ObjFunction;
 
 void initChunk(Chunk *chunk);
 

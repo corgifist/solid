@@ -31,7 +31,7 @@ public:
         return text;
     }
 
-    string asString() {
+    string asString() const {
         string acc = "";
         acc += type;
         acc += " ";
@@ -137,6 +137,7 @@ private:
         else if (acc == "case") addToken("CASE", "case");
         else if (acc == "default") addToken("DEFAULT", "default");
         else if (acc == "auto") addToken("AUTO", "auto");
+        else if (acc == "void") addToken("VOID", "void");
         else addToken("ID", acc);
     }
 

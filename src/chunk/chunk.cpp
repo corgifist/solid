@@ -58,7 +58,7 @@ int addConstant(Chunk* chunk, Value value) {
 
 int writeConstant(Chunk *chunk, Value value, int line) {
     int index = addConstant(chunk, value);
-    if (index < 256) {
+    if (index < 255) {
         writeChunk(chunk, CONSTANT, line);
         writeChunk(chunk, (uint8_t)index, line);
     } else {

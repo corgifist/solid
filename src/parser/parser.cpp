@@ -6,7 +6,7 @@
 #include <utility>
 #include "lexer.cpp"
 #include "../chunk/chunk.h"
-#include "../runtime/table.h"
+#include "../chunk/debug.h"
 
 #define PARSER_RUNTIME_ERROR() runtime_result = RUNTIME_ERROR
 
@@ -16,6 +16,7 @@ private:
     unsigned int pos, size;
     Chunk chunk{};
     Token EOF_TOKEN = Token("EOF", 1, "\0");
+    string function;
 
     Token get(int rel) const {
         int final = pos + rel;
@@ -154,10 +155,11 @@ private:
     }
 
 public:
-    explicit Parser(const vector<Token>& tokens) {
+    explicit Parser(const vector<Token>& tokens, string function) {
         this->tokens = tokens;
         this->pos = 0;
         this->size = tokens.size();
+        this->function = function;
         initChunk(&chunk);
 
         typedefsPut("short", "r_shrt16");
@@ -191,13 +193,19 @@ public:
         emitByte(SCOPE_END);
     }
 
-    Chunk parse() {
+    ObjFunction parse() {
         while(!match("EOF")) {
             declaration();
             consume("SEMICOLON", "expected ';' after expression");
         }
         writeChunk(&chunk, RETURN, line());
-        return chunk;
+        Clause clause;
+        clause.arity = 0;
+        clause.chunk = this->chunk;
+        ObjFunction function;
+        function.name = this->function;
+        function.clauses.push_back(clause);
+        return function;
     }
 
     void declaration() {
@@ -248,10 +256,39 @@ public:
             declare_switch();
         } else if (match("AUTO")) {
             declare_auto();
+        } else if (match("VOID")) {
+            declare_void();
         } else {
             expressionStatement();
         }
     }
+
+    void declare_void() {
+        string name = consume(get(0).getType(), "expected token with name").getText();
+        consume("LPAREN", "expected '(' after name");
+        consume("RPAREN", "expected ')' after arguments");
+        vector<Token> blockTokens = extractFullBlock();
+        ObjFunction obj = Parser(blockTokens, string("<fn ") + name + ">").parse();
+        emitConstant(STRANGE(&obj));
+        emitByte(DECLARE_FUNCTION);
+        identifierConstant(name);
+    }
+
+    vector<Token> extractFullBlock() {
+        vector<Token> acc;
+        short indent = 0;
+        while (true) {
+            if (lookMatch(0, "LBRACE")) indent++;
+            else if (lookMatch(0, "RBRACE")) indent--;
+            acc.push_back(consume(get(0).getType(), ""));
+            if (indent <= 0) {
+                break;
+            }
+        }
+        acc.emplace_back("SEMICOLON", 0, ";");
+        return acc;
+    }
+
     void declare_switch() {
         consume("LPAREN", "Expect '(' after 'switch'.");
         expression();

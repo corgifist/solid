@@ -16,8 +16,8 @@ void parse(const char* msg) {
         vector<Token> result = lexer.lex();
         runtime_check();
         dump_tokens(result);
-        Parser parser = Parser(result);
-        Chunk chunk = parser.parse();
+        Parser parser = Parser(result, "<fn main>");
+        Chunk chunk = parser.parse().clauses.at(0).chunk;
         runtime_check();
         disassemble(&chunk, "compiler test");
         initVM(&chunk);

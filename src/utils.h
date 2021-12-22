@@ -6,17 +6,6 @@
 #include "values/type.h"
 #include "common.h"
 
-typedef enum {
-    RETURN, CONSTANT, LONG_CONSTANT, UNARY, EXTRACT_BIND, BINARY,
-    POP, DECLARE_R_INT_32, DECLARE_R_INT_16, DECLARE_R_INT_64,
-    CAST, ASSIGN, PRINT, DECLARE_R_FLOAT_64, DECLARE_R_CHR_PTR,
-    DECLARE_R_BOOL_1, DECLARE_R_BYTE_8, SCOPE_START, SCOPE_END,
-    DECLARE_U_BYTE_8, DECLARE_U_SHRT_16, DECLARE_U_INT_32,
-    DECLARE_U_INT_64, JUMP_IF_FALSE, JUMP_ANYWAY, CONSTANTIFY,
-    DECLARE_R_CHR_8, LOOP, DUP, BUILD_SWITCH, BEGIN_SWITCH, SWITCH_TABLE,
-    DECLARE_AUTO
-} OpCode;
-
 #define SSTR(x) dynamic_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
 
@@ -150,6 +139,8 @@ static std::string object_to_string(Value value) {
             return value.as.boolean ? "true" : "false";
         case CHAR:
             return SSTR(value.as.byte);
+        case STRANGE:
+            return "?";
         default:
             return "NULL";
     }
@@ -179,6 +170,8 @@ static size_t size(Value value) {
             return sizeof(unsigned int);
         case UNSIGNED_LONG:
             return sizeof(unsigned long);
+        case STRANGE:
+            return sizeof(void*);
         default:
             return 8;
     }
@@ -210,6 +203,8 @@ static const char* type(Value operand) {
             return "u_long";
         case CHAR:
             return "char";
+        case STRANGE:
+            return "strange";
     }
     return "NULL";
 }
